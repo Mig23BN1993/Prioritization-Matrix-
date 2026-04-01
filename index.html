@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Operational Opportunity Matrix — Midstream O&G</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #F5F3EE;
+    --surface: #FFFFFF;
+    --surface2: #F0EDE6;
+    --border: rgba(0,0,0,0.10);
+    --border-strong: rgba(0,0,0,0.18);
+    --text: #1A1A18;
+    --text-muted: #6B6860;
+    --text-faint: #9A9890;
+    --green-bg: #EAF3DE; --green: #3B6D11; --green-mid: #639922;
+    --red-bg: #FAECE7; --red: #993C1D; --red-mid: #D85A30;
+    --blue-bg: #E6F1FB; --blue: #185FA5; --blue-mid: #378ADD;
+    --amber-bg: #FAEEDA; --amber: #854F0B;
+    --accent: #2A5C8F;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --shadow: 0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+  }
+  .header-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, #2A5C8F 0%, #1a3d5c 100%);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .header-icon svg { width: 18px; height: 18px; fill: white; }
+  .header-text h1 { font-size: 15px; font-weight: 600; color: var(--text); }
+  .header-text p { font-size: 12px; color: var(--text-muted); }
+  .header-badge {
+    margin-left: auto;
+    font-size: 11px; font-weight: 500;
+    background: var(--blue-bg); color: var(--blue);
+    padding: 3px 10px; border-radius: 99px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* LAYOUT */
+  .container { max-width: 1100px; margin: 0 auto; padding: 28px 24px 60px; }
+
+  /* TABS */
+  .tab-bar {
+    display: flex; gap: 2px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 4px;
+    margin-bottom: 24px;
+    width: fit-content;
+  }
+  .tab {
+    font-size: 13px; font-weight: 500;
+    padding: 7px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .tab.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-size: 11px; font-weight: 600;
+    letter-spacing: .08em; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .section-label.green { color: var(--green); }
+  .section-label.red { color: var(--red); }
+  .section-label.blue { color: var(--blue); }
+
+  /* INFO BOX */
+  .info-box {
+    background: var(--blue-bg);
+    border-left: 3px solid var(--blue-mid);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 12px 16px;
+    font-size: 13px; color: var(--blue);
+    margin-bottom: 20px; line-height: 1.6;
+  }
+
+  /* FORMULA BOX */
+  .formula-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    font-size: 13px; color: var(--text-muted);
+    margin-bottom: 20px; line-height: 2;
+    font-family: 'DM Mono', monospace;
+  }
+  .formula-box b { color: var(--text); font-weight: 500; font-family: 'DM Sans', sans-serif; }
+
+  /* CRITERIA ACCORDION */
+  details.criteria {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  details.criteria summary {
+    font-size: 13px; font-weight: 500;
+    padding: 11px 16px;
+    cursor: pointer;
+    background: var(--surface);
+    user-select: none;
+    display: flex; align-items: center; gap: 8px;
+    list-style: none;
+  }
+  details.criteria summary::-webkit-details-marker { display: none; }
+  details.criteria summary::before {
+    content: '›';
+    font-size: 16px; color: var(--text-muted);
+    transition: transform .15s;
+    display: inline-block; width: 14px; text-align: center;
+  }
+  details.criteria[open] summary::before { transform: rotate(90deg); }
+  details.criteria[open] summary { background: var(--surface2); }
+  .criteria-body { padding: 0 16px 14px; background: var(--surface); }
+
+  /* TABLES */
+  table.def-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 10px; }
+  table.def-table th {
+    font-weight: 500; color: var(--text-muted);
+    padding: 6px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    text-align: left;
+  }
+  table.def-table td {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+    color: var(--text);
+  }
+  table.def-table tr:nth-child(even) td { background: #FAFAF8; }
+
+  /* WEIGHT INPUTS */
+  .weight-grid { display: flex; flex-direction: column; gap: 8px; }
+  .weight-row { display: flex; align-items: center; gap: 12px; }
+  .weight-row label { font-size: 13px; min-width: 180px; color: var(--text); }
+  .weight-row input[type=number] {
+    width: 64px; padding: 5px 8px;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    font-size: 13px; font-family: 'DM Mono', monospace;
+    background: var(--surface); color: var(--text);
+    text-align: center;
+  }
+  .weight-row input:focus { outline: 2px solid var(--blue-mid); }
+  .weight-sum {
+    font-size: 12px; font-family: 'DM Mono', monospace;
+    margin-top: 6px; margin-bottom: 20px;
+    color: var(--text-muted);
+  }
+  .weight-sum span { font-weight: 500; }
+
+  /* SCORING */
+  .add-row { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+  .add-row input[type=text] {
+    font-size: 13px; padding: 7px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background: var(--surface); color: var(--text);
+    width: 260px;
+  }
+  .btn {
+    font-size: 12.5px; font-weight: 500;
+    padding: 7px 16px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background: var(--surface); color: var(--text);
+    cursor: pointer; transition: all .12s;
+  }
+  .btn:hover { background: var(--surface2); }
+  .btn.primary {
+    background: var(--accent); color: white;
+    border-color: var(--accent);
+    padding: 8px 22px; font-size: 13px;
+  }
+  .btn.primary:hover { background: #1e4a74; }
+  .btn.danger { color: var(--red); border-color: transparent; }
+  .btn.danger:hover { background: var(--red-bg); }
+
+  .scoring-wrap { overflow-x: auto; }
+  table.scoring-table { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
+  table.scoring-table th {
+    font-size: 11px; font-weight: 500;
+    padding: 8px 10px;
+    border-bottom: 2px solid var(--border);
+    text-align: left; color: var(--text-muted);
+  }
+  table.scoring-table th.th-b { color: var(--green); }
+  table.scoring-table th.th-f { color: var(--red); }
+  table.scoring-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  table.scoring-table tbody tr:hover td { background: var(--surface2); }
+  .opp-name-cell { font-weight: 500; min-width: 150px; white-space: normal; }
+
+  select.score-sel {
+    font-size: 12px; padding: 3px 6px;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    background: var(--surface); color: var(--text);
+    cursor: pointer; width: 50px; text-align: center;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* RESULTS */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(0,1fr)); gap: 10px; margin-bottom: 20px; }
+  .kpi-card { background: var(--surface2); border-radius: var(--radius); padding: 12px 16px; }
+  .kpi-card .kpi-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+  .kpi-card .kpi-value { font-size: 22px; font-weight: 600; color: var(--text); line-height: 1.2; }
+  .kpi-card .kpi-sub { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+
+  table.results-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.results-table th {
+    font-size: 11px; font-weight: 500;
+    padding: 8px 12px;
+    border-bottom: 2px solid var(--border);
+    text-align: left; color: var(--text-muted);
+    white-space: nowrap;
+  }
+  table.results-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  table.results-table tbody tr:hover td { background: var(--surface2); }
+
+  .badge {
+    display: inline-block; font-size: 12px; font-weight: 500;
+    padding: 3px 10px; border-radius: 99px;
+    font-family: 'DM Mono', monospace;
+  }
+  .rank-chip {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    font-size: 12px; font-weight: 600;
+    background: var(--surface2); color: var(--text-muted);
+  }
+  .rank-1 { background: #FAEEDA; color: #854F0B; }
+  .rank-2 { background: #E0DFDB; color: #444441; }
+  .rank-3 { background: #FAECE7; color: #993C1D; }
+
+  .dot {
+    display: inline-block; width: 9px; height: 9px;
+    border-radius: 50%; margin-right: 2px;
+  }
+  .legend {
+    margin-top: 14px; font-size: 11.5px; color: var(--text-faint);
+    line-height: 1.9;
+  }
+
+  .export-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+  .export-bar span { font-size: 12px; color: var(--text-muted); }
+
+  @media (max-width: 640px) {
+    .container { padding: 16px 12px 40px; }
+    .header { padding: 14px 16px; }
+    .tab { padding: 6px 12px; font-size: 12px; }
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-icon">
+    <svg viewBox="0 0 20 20"><path d="M3 4h14v2H3zm0 4h10v2H3zm0 4h12v2H3z"/></svg>
+  </div>
+  <div class="header-text">
+    <h1>Operational Opportunity Matrix</h1>
+    <p>Midstream Oil &amp; Gas — Prioritization Framework</p>
+  </div>
+  <div class="header-badge">v1.0</div>
+</header>
+
+<div class="container">
+  <div class="tab-bar">
+    <div class="tab active" onclick="switchTab('definitions')">Criteria &amp; Definitions</div>
+    <div class="tab" onclick="switchTab('weights')">Weights</div>
+    <div class="tab" onclick="switchTab('scoring')">Score Opportunities</div>
+    <div class="tab" onclick="switchTab('results')">Results &amp; Ranking</div>
+  </div>
+
+  <!-- DEFINITIONS -->
+  <div class="panel active" id="panel-definitions">
+    <div class="card">
+      <div class="info-box">
+        Seven criteria split into two composite scores. <strong>Benefit</strong> captures operational value; <strong>Friction</strong> captures execution difficulty. All criteria scored 1–5 (1 = very low, 5 = very high).
+      </div>
+
+      <div class="section-label green">Benefit criteria — what the opportunity delivers</div>
+
+      <details class="criteria" open>
+        <summary>Impact</summary>
+        <div class="criteria-body">
+          <table class="def-table">
+            <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
+            <tr><td>1</td><td>Negligible operational effect</td><td>Minor admin workflow tweak</td></tr>
+            <tr><td>2</td><td>Limited improvement, narrow scope</td><td>Single terminal throughput +1%</td></tr>
+            <tr><td>3</td><td>Moderate gain affecting one asset class</td><td>Pipeline compression efficiency +5%</td></tr>
+            <tr><td>4</td><td>Significant gain, multi-asset or network-level</td><td>NGL recovery improvement across a system</td></tr>
+            <tr><td>5</td><td>Transformational, enterprise-wide effect</td><td>Real-time SCADA optimization reducing unplanned shutdowns &gt;20%</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="criteria">
+        <summary>Criticality</summary>
+        <div class="criteria-body">
+          <table class="def-table">
+            <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
+            <tr><td>1</td><td>Nice-to-have, no compliance/safety link</td><td>Reporting dashboard beautification</td></tr>
+            <tr><td>2</td><td>Operationally useful but deferrable</td><td>Predictive scheduling for truck dispatch</td></tr>
+            <tr><td>3</td><td>Important for reliability or regulatory posture</td><td>Leak detection model on a gathering line</td></tr>
+            <tr><td>4</td><td>High criticality — failure has financial/regulatory consequence</td><td>Cathodic protection monitoring</td></tr>
+            <tr><td>5</td><td>Safety/compliance mandatory; deferral = liability</td><td>PHMSA-mandated integrity management program</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="criteria">
+        <summary>Value potential ($)</summary>
+        <div class="criteria-body">
+          <table class="def-table">
+            <tr><th>Score</th><th>Annual EBITDA contribution</th><th>Midstream example</th></tr>
+            <tr><td>1</td><td>&lt; $250K</td><td>Route optimization for one fleet</td></tr>
+            <tr><td>2</td><td>$250K – $1M</td><td>Fuel gas optimization on a compressor station</td></tr>
+            <tr><td>3</td><td>$1M – $5M</td><td>Throughput uplift on a gathering system</td></tr>
+            <tr><td>4</td><td>$5M – $20M</td><td>Fractionator yield improvement</td></tr>
+            <tr><td>5</td><td>&gt; $20M</td><td>Major pipeline capacity release or tariff optimization</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <div class="section-label red" style="margin-top:22px">Friction criteria — what it costs to execute</div>
+
+      <details class="criteria">
+        <summary>Level of difficulty / ease of implementation</summary>
+        <div class="criteria-body">
+          <table class="def-table">
+            <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
+            <tr><td>1</td><td>Very easy — off-the-shelf, no integration required</td><td>Commercial SaaS ERP module</td></tr>
+            <tr><td>2</td><td>Low complexity — minor config, existing data</td><td>Dashboard built on existing historian</td></tr>
+            <tr><td>3</td><td>Moderate — some integration, vendor support needed</td><td>Predictive maintenance with new sensors</td></tr>
+            <tr><td>4</td><td>High complexity — custom build or major IT change</td><td>ML model requiring new data pipeline</td></tr>
+            <tr><td>5</td><td>Very high — multi-system overhaul or greenfield</td><td>Enterprise SCADA replacement</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="criteria">
+        <summary>Time to value</summary>
+        <div class="criteria-body">
+          <table class="def-table">
+            <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
+            <tr><td>1</td><td>&lt; 1 month</td><td>Quick-config reporting change</td></tr>
+            <tr><td>2</td><td>1–3 months</td><td>Pilot on one compressor station</td></tr>
+            <tr><td>3</td><td>3–6 months</td><td>New measurement and analytics layer</td></tr>
+            <tr><td>4</td><td>6–12 months</td><td>Full network optimization rollout</td></tr>
+            <tr><td>5</td><td>&gt; 12 months</td><td>Multi-phase infrastructure program</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="criteria">
+        <summary>Risk / complexity</summary>
+        <div class="criteria-body">
+          <table class="def-table">
+            <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
+            <tr><td>1</td><td>Proven solution, near-zero execution risk</td><td>Vendor-certified metering upgrade</td></tr>
+            <tr><td>2</td><td>Low risk — minor unknowns, good analogues</td><td>Scheduling algorithm with similar case studies</td></tr>
+            <tr><td>3</td><td>Moderate risk — some technology or process uncertainty</td><td>First-of-kind digital twin for a segment</td></tr>
+            <tr><td>4</td><td>High risk — novel approach, limited precedent</td><td>AI-driven autonomous control on live pipeline</td></tr>
+            <tr><td>5</td><td>Very high — regulatory, technology, and change-mgmt risk all present</td><td>Cross-company data sharing platform</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="criteria">
+        <summary>Dependencies</summary>
+        <div class="criteria-body">
+          <table class="def-table">
+            <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
+            <tr><td>1</td><td>Standalone — no external dependencies</td><td>Internal ops report</td></tr>
+            <tr><td>2</td><td>Minor — 1–2 internal approvals</td><td>Data access request to IT</td></tr>
+            <tr><td>3</td><td>Moderate — cross-functional or minor vendor dependency</td><td>Requires engineering, ops, and IT alignment</td></tr>
+            <tr><td>4</td><td>High — external partners, regulatory, or contract dependencies</td><td>Shipper agreement or FERC filing needed</td></tr>
+            <tr><td>5</td><td>Very high — JV partner, third-party infrastructure, multi-regulator</td><td>Interconnect expansion needing 3 counterparty approvals</td></tr>
+          </table>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- WEIGHTS -->
+  <div class="panel" id="panel-weights">
+    <div class="card">
+      <div class="formula-box">
+        <b>Benefit score</b> = weighted avg of Impact, Criticality, Value ($)<br>
+        <b>Friction score</b> = weighted avg of Difficulty, Time to value, Risk, Dependencies<br>
+        <b>Priority score</b> = Benefit × (6 − Friction) &nbsp;— rewards high benefit + low friction<br>
+        <b>Priority index</b> = Benefit ÷ Friction &nbsp;— pure bang-for-buck ratio<br>
+        <b>Priority rank</b> = ranked descending by Priority score
+      </div>
+
+      <div class="section-label green">Benefit weights (must sum to 100%)</div>
+      <div class="weight-grid">
+        <div class="weight-row"><label>Impact</label><input type="number" id="w-impact" min="0" max="100" value="35"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+        <div class="weight-row"><label>Criticality</label><input type="number" id="w-crit" min="0" max="100" value="30"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+        <div class="weight-row"><label>Value potential ($)</label><input type="number" id="w-value" min="0" max="100" value="35"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+      </div>
+      <div class="weight-sum">Sum: <span id="bsum">100%</span></div>
+
+      <div class="section-label red">Friction weights (must sum to 100%)</div>
+      <div class="weight-grid">
+        <div class="weight-row"><label>Difficulty</label><input type="number" id="w-diff" min="0" max="100" value="25"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+        <div class="weight-row"><label>Time to value</label><input type="number" id="w-time" min="0" max="100" value="25"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+        <div class="weight-row"><label>Risk / complexity</label><input type="number" id="w-risk" min="0" max="100" value="30"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+        <div class="weight-row"><label>Dependencies</label><input type="number" id="w-dep" min="0" max="100" value="20"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+      </div>
+      <div class="weight-sum">Sum: <span id="fsum">100%</span></div>
+    </div>
+  </div>
+
+  <!-- SCORING -->
+  <div class="panel" id="panel-scoring">
+    <div class="card">
+      <div class="add-row">
+        <input type="text" id="new-name" placeholder="Opportunity name..." />
+        <button class="btn" onclick="addOpp()">+ Add opportunity</button>
+      </div>
+      <div class="scoring-wrap">
+        <table class="scoring-table" id="scoring-table">
+          <thead>
+            <tr>
+              <th style="min-width:150px">Opportunity</th>
+              <th class="th-b">Impact</th>
+              <th class="th-b">Criticality</th>
+              <th class="th-b">Value ($)</th>
+              <th class="th-f">Difficulty</th>
+              <th class="th-f">Time</th>
+              <th class="th-f">Risk</th>
+              <th class="th-f">Dependencies</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="scoring-body"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:16px">
+        <button class="btn primary" onclick="calculate()">Calculate &amp; rank →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="panel" id="panel-results">
+    <div id="results-area">
+      <div class="card" style="color:var(--text-muted);font-size:13px">
+        Score at least one opportunity, then click "Calculate &amp; rank" in the Scoring tab.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let opps = [
+  {name:"Real-time pipeline optimization", s:[5,4,5,4,4,4,3]},
+  {name:"NGL fractionation yield uplift", s:[4,3,5,3,3,3,2]},
+  {name:"Compressor station fuel optimization", s:[3,2,3,2,2,2,1]},
+  {name:"Leak detection ML model rollout", s:[4,5,4,4,3,4,3]},
+  {name:"Throughput scheduling automation", s:[3,3,3,2,2,2,2]},
+];
+
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(el => el.classList.remove('active'));
+  document.querySelector('[onclick="switchTab(\''+t+'\')"]').classList.add('active');
+  document.getElementById('panel-'+t).classList.add('active');
+  if (t === 'scoring') renderScoring();
+}
+
+function getW() {
+  return {
+    bw: [+document.getElementById('w-impact').value, +document.getElementById('w-crit').value, +document.getElementById('w-value').value],
+    fw: [+document.getElementById('w-diff').value, +document.getElementById('w-time').value, +document.getElementById('w-risk').value, +document.getElementById('w-dep').value]
+  };
+}
+
+function updateSums() {
+  const {bw, fw} = getW();
+  const bs = bw.reduce((a,b)=>a+b,0), fs = fw.reduce((a,b)=>a+b,0);
+  const bel = document.getElementById('bsum'), fel = document.getElementById('fsum');
+  bel.textContent = bs+'%'; bel.style.color = bs===100?'#3B6D11':'#993C1D';
+  fel.textContent = fs+'%'; fel.style.color = fs===100?'#3B6D11':'#993C1D';
+}
+document.querySelectorAll('input[type=number]').forEach(i => i.addEventListener('input', updateSums));
+updateSums();
+
+function mkSelect(i, fi) {
+  let o = '';
+  for (let v=1;v<=5;v++) o += `<option value="${v}"${opps[i].s[fi]===v?' selected':''}>${v}</option>`;
+  return `<select class="score-sel" onchange="opps[${i}].s[${fi}]=+this.value">${o}</select>`;
+}
+
+function renderScoring() {
+  const tbody = document.getElementById('scoring-body');
+  tbody.innerHTML = opps.map((opp, i) => `
+    <tr>
+      <td class="opp-name-cell">${opp.name}</td>
+      ${[0,1,2,3,4,5,6].map(fi => `<td>${mkSelect(i,fi)}</td>`).join('')}
+      <td><button class="btn danger" onclick="opps.splice(${i},1);renderScoring()">✕</button></td>
+    </tr>`).join('');
+}
+
+function addOpp() {
+  const inp = document.getElementById('new-name');
+  const name = inp.value.trim() || 'New opportunity '+(opps.length+1);
+  opps.push({name, s:[3,3,3,3,3,3,3]});
+  inp.value = '';
+  renderScoring();
+}
+
+function scoreColor(v, hi) {
+  if (!hi) {
+    if (v>=4.2) return {bg:'#EAF3DE',col:'#3B6D11'};
+    if (v>=3.2) return {bg:'#E6F1FB',col:'#185FA5'};
+    if (v>=2.2) return {bg:'#FAEEDA',col:'#854F0B'};
+    return {bg:'#FAECE7',col:'#993C1D'};
+  } else {
+    if (v>=4.2) return {bg:'#FAECE7',col:'#993C1D'};
+    if (v>=3.2) return {bg:'#FAEEDA',col:'#854F0B'};
+    if (v>=2.2) return {bg:'#E6F1FB',col:'#185FA5'};
+    return {bg:'#EAF3DE',col:'#3B6D11'};
+  }
+}
+
+function calculate() {
+  const {bw, fw} = getW();
+  if (bw.reduce((a,b)=>a+b,0)!==100 || fw.reduce((a,b)=>a+b,0)!==100) {
+    alert('Weights must each sum to 100%. Please adjust in the Weights tab.'); return;
+  }
+  let res = opps.map(opp => {
+    const s = opp.s;
+    const benefit = (s[0]*bw[0]+s[1]*bw[1]+s[2]*bw[2])/100;
+    const friction = (s[3]*fw[0]+s[4]*fw[1]+s[5]*fw[2]+s[6]*fw[3])/100;
+    return {name:opp.name, s, benefit, friction, priority: benefit*(6-friction), index: benefit/friction};
+  });
+  res.sort((a,b)=>b.priority-a.priority);
+  res.forEach((r,i)=>r.rank=i+1);
+
+  const avg = (key) => (res.reduce((a,b)=>a+b[key],0)/res.length).toFixed(2);
+  const top = res[0];
+
+  const dotColors = {
+    b: ['#C0DD97','#97C459','#639922','#3B6D11','#27500A'],
+    f: ['#F7C1C1','#F09595','#E24B4A','#A32D2D','#791F1F']
+  };
+
+  let html = `
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-label">Top priority</div><div class="kpi-value" style="font-size:15px;line-height:1.4">${top.name}</div><div class="kpi-sub">Rank #1 opportunity</div></div>
+      <div class="kpi-card"><div class="kpi-label">Opportunities</div><div class="kpi-value">${res.length}</div><div class="kpi-sub">Total scored</div></div>
+      <div class="kpi-card"><div class="kpi-label">Avg benefit</div><div class="kpi-value">${avg('benefit')}</div><div class="kpi-sub">Out of 5.0</div></div>
+      <div class="kpi-card"><div class="kpi-label">Avg friction</div><div class="kpi-value">${avg('friction')}</div><div class="kpi-sub">Out of 5.0</div></div>
+    </div>
+    <div class="card" style="overflow-x:auto">
+    <table class="results-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Opportunity</th>
+          <th style="color:var(--green)">Benefit score<br><span style="font-weight:400;color:var(--text-faint);font-size:10px">EBITDA / value</span></th>
+          <th style="color:var(--red)">Friction score<br><span style="font-weight:400;color:var(--text-faint);font-size:10px">Execution difficulty</span></th>
+          <th style="color:var(--blue)">Priority score<br><span style="font-weight:400;color:var(--text-faint);font-size:10px">Overall attractiveness</span></th>
+          <th>Priority index<br><span style="font-weight:400;color:var(--text-faint);font-size:10px">Bang for buck</span></th>
+          <th>Criteria dots<br><span style="font-weight:400;color:var(--text-faint);font-size:10px">Impact·Crit·Val$·Diff·Time·Risk·Dep</span></th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+  res.forEach(r => {
+    const bc = scoreColor(r.benefit, false);
+    const fc = scoreColor(r.friction, true);
+    const pc = scoreColor(r.priority/5, false);
+    const rClass = r.rank <= 3 ? 'rank-'+r.rank : '';
+    const dots = r.s.map((v,i) => {
+      const c = i<3 ? dotColors.b[v-1] : dotColors.f[v-1];
+      return `<span class="dot" style="background:${c}" title="Score ${v}"></span>`;
+    }).join('');
+    html += `<tr>
+      <td><span class="rank-chip ${rClass}">${r.rank}</span></td>
+      <td style="font-weight:500;min-width:150px;white-space:normal">${r.name}</td>
+      <td><span class="badge" style="background:${bc.bg};color:${bc.col}">${r.benefit.toFixed(2)}</span></td>
+      <td><span class="badge" style="background:${fc.bg};color:${fc.col}">${r.friction.toFixed(2)}</span></td>
+      <td><span class="badge" style="background:${pc.bg};color:${pc.col}">${r.priority.toFixed(2)}</span></td>
+      <td style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500">${r.index.toFixed(2)}×</td>
+      <td>${dots}</td>
+    </tr>`;
+  });
+
+  html += `</tbody></table>
+    <div class="legend">
+      <strong>Benefit score</strong> = weighted avg of Impact, Criticality, Value$ &nbsp;|&nbsp;
+      <strong>Friction score</strong> = weighted avg of Difficulty, Time, Risk, Dependencies &nbsp;|&nbsp;
+      <strong>Priority score</strong> = Benefit × (6 − Friction) &nbsp;|&nbsp;
+      <strong>Priority index</strong> = Benefit ÷ Friction &nbsp;|&nbsp;
+      Green dots = benefit criteria &nbsp;|&nbsp; Red dots = friction criteria
+    </div>
+    </div>`;
+
+  document.getElementById('results-area').innerHTML = html;
+  switchTab('results');
+}
+
+renderScoring();
+</script>
+</body>
+</html>
