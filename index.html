@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Operational Opportunity Matrix — Midstream O&G</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
@@ -16,562 +17,502 @@
     --text: #1A1A18;
     --text-muted: #6B6860;
     --text-faint: #9A9890;
-    --green-bg: #EAF3DE; --green: #3B6D11; --green-mid: #639922;
-    --red-bg: #FAECE7; --red: #993C1D; --red-mid: #D85A30;
-    --blue-bg: #E6F1FB; --blue: #185FA5; --blue-mid: #378ADD;
-    --amber-bg: #FAEEDA; --amber: #854F0B;
+    --green: #3B6D11; --green-bg: #EAF3DE; --green-mid: #639922;
+    --red: #993C1D;   --red-bg: #FAECE7;   --red-mid: #D85A30;
+    --blue: #185FA5;  --blue-bg: #E6F1FB;  --blue-mid: #378ADD;
+    --amber: #854F0B; --amber-bg: #FAEEDA;
     --accent: #2A5C8F;
-    --radius: 10px;
-    --radius-lg: 14px;
+    --radius: 10px; --radius-lg: 14px;
     --shadow: 0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
+    --grid-col: rgba(0,0,0,0.07);
+    --axis-col: #6B6860;
+    --mid-line: rgba(0,0,0,0.15);
+    --quad-label: rgba(0,0,0,0.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #18181A; --surface: #232325; --surface2: #2C2C2E;
+      --border: rgba(255,255,255,0.10); --border-strong: rgba(255,255,255,0.20);
+      --text: #F0EDE6; --text-muted: #9A9890; --text-faint: #6B6860;
+      --grid-col: rgba(255,255,255,0.07);
+      --axis-col: #9A9890;
+      --mid-line: rgba(255,255,255,0.18);
+      --quad-label: rgba(255,255,255,0.22);
+    }
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
     font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    font-size: 14px;
-    line-height: 1.6;
-    min-height: 100vh;
+    background: var(--bg); color: var(--text);
+    font-size: 14px; line-height: 1.6; min-height: 100vh;
   }
 
-  /* HEADER */
-  .header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 18px 32px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+  /* ── HEADER ── */
+  .hdr {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 15px 32px; display: flex; align-items: center; gap: 14px;
+    position: sticky; top: 0; z-index: 100;
     box-shadow: 0 1px 8px rgba(0,0,0,0.06);
   }
-  .header-icon {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, #2A5C8F 0%, #1a3d5c 100%);
-    border-radius: 8px;
+  .hdr-icon {
+    width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
+    background: linear-gradient(135deg,#2A5C8F,#1a3d5c);
     display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
   }
-  .header-icon svg { width: 18px; height: 18px; fill: white; }
-  .header-text h1 { font-size: 15px; font-weight: 600; color: var(--text); }
-  .header-text p { font-size: 12px; color: var(--text-muted); }
-  .header-badge {
-    margin-left: auto;
-    font-size: 11px; font-weight: 500;
+  .hdr-icon svg { width: 18px; height: 18px; fill: #fff; }
+  .hdr-title h1 { font-size: 15px; font-weight: 600; }
+  .hdr-title p  { font-size: 12px; color: var(--text-muted); }
+  .hdr-badge {
+    margin-left: auto; font-size: 11px; font-weight: 500;
     background: var(--blue-bg); color: var(--blue);
     padding: 3px 10px; border-radius: 99px;
     font-family: 'DM Mono', monospace;
   }
 
-  /* LAYOUT */
-  .container { max-width: 1100px; margin: 0 auto; padding: 28px 24px 60px; }
+  /* ── LAYOUT ── */
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 24px 64px; }
 
-  /* TABS */
-  .tab-bar {
-    display: flex; gap: 2px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 4px;
-    margin-bottom: 24px;
-    width: fit-content;
+  /* ── TABS ── */
+  .tabs {
+    display: flex; gap: 2px; flex-wrap: wrap;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 4px;
+    margin-bottom: 22px; width: fit-content;
   }
   .tab {
-    font-size: 13px; font-weight: 500;
-    padding: 7px 18px;
-    border-radius: 8px;
-    cursor: pointer;
-    color: var(--text-muted);
-    transition: all .15s;
-    white-space: nowrap;
+    font-size: 13px; font-weight: 500; padding: 7px 17px;
+    border-radius: 8px; cursor: pointer; color: var(--text-muted);
+    transition: all .14s; white-space: nowrap;
   }
-  .tab.active {
-    background: var(--surface);
-    color: var(--text);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-  }
-  .tab:hover:not(.active) { color: var(--text); }
+  .tab.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .tab:hover:not(.on) { color: var(--text); }
+  .pnl { display: none; }
+  .pnl.on { display: block; }
 
-  .panel { display: none; }
-  .panel.active { display: block; }
-
-  /* CARDS */
+  /* ── CARD ── */
   .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 20px 24px;
-    margin-bottom: 16px;
-    box-shadow: var(--shadow);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 20px 24px;
+    margin-bottom: 16px; box-shadow: var(--shadow);
   }
 
-  /* SECTION LABEL */
-  .section-label {
-    font-size: 11px; font-weight: 600;
-    letter-spacing: .08em; text-transform: uppercase;
-    margin-bottom: 14px;
+  /* ── SECTION LABEL ── */
+  .slabel {
+    font-size: 11px; font-weight: 600; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 12px;
   }
-  .section-label.green { color: var(--green); }
-  .section-label.red { color: var(--red); }
-  .section-label.blue { color: var(--blue); }
+  .slabel.g { color: var(--green); }
+  .slabel.r { color: var(--red); }
+  .slabel.b { color: var(--blue); }
 
-  /* INFO BOX */
-  .info-box {
-    background: var(--blue-bg);
-    border-left: 3px solid var(--blue-mid);
+  /* ── INFO / FORMULA BOX ── */
+  .info {
+    background: var(--blue-bg); border-left: 3px solid var(--blue-mid);
     border-radius: 0 var(--radius) var(--radius) 0;
-    padding: 12px 16px;
-    font-size: 13px; color: var(--blue);
-    margin-bottom: 20px; line-height: 1.6;
+    padding: 11px 15px; font-size: 13px; color: var(--blue);
+    margin-bottom: 16px; line-height: 1.6;
   }
+  .formula {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 13px 17px;
+    font-size: 13px; color: var(--text-muted); line-height: 2;
+    font-family: 'DM Mono', monospace; margin-bottom: 18px;
+  }
+  .formula b { color: var(--text); font-weight: 500; font-family: 'DM Sans', sans-serif; }
 
-  /* FORMULA BOX */
-  .formula-box {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px 18px;
-    font-size: 13px; color: var(--text-muted);
-    margin-bottom: 20px; line-height: 2;
-    font-family: 'DM Mono', monospace;
+  /* ── ACCORDION ── */
+  details.crit { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 7px; overflow: hidden; }
+  details.crit summary {
+    font-size: 13px; font-weight: 500; padding: 10px 15px;
+    cursor: pointer; background: var(--surface); list-style: none;
+    display: flex; align-items: center; gap: 8px; user-select: none;
   }
-  .formula-box b { color: var(--text); font-weight: 500; font-family: 'DM Sans', sans-serif; }
+  details.crit summary::-webkit-details-marker { display: none; }
+  details.crit summary::before {
+    content: '›'; font-size: 15px; color: var(--text-muted);
+    transition: transform .13s; display: inline-block; width: 13px; text-align: center;
+  }
+  details.crit[open] summary::before { transform: rotate(90deg); }
+  details.crit[open] summary { background: var(--surface2); }
+  .cbody { padding: 0 15px 13px; background: var(--surface); }
 
-  /* CRITERIA ACCORDION */
-  details.criteria {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    margin-bottom: 8px;
-    overflow: hidden;
-  }
-  details.criteria summary {
-    font-size: 13px; font-weight: 500;
-    padding: 11px 16px;
-    cursor: pointer;
-    background: var(--surface);
-    user-select: none;
-    display: flex; align-items: center; gap: 8px;
-    list-style: none;
-  }
-  details.criteria summary::-webkit-details-marker { display: none; }
-  details.criteria summary::before {
-    content: '›';
-    font-size: 16px; color: var(--text-muted);
-    transition: transform .15s;
-    display: inline-block; width: 14px; text-align: center;
-  }
-  details.criteria[open] summary::before { transform: rotate(90deg); }
-  details.criteria[open] summary { background: var(--surface2); }
-  .criteria-body { padding: 0 16px 14px; background: var(--surface); }
+  /* ── DEF TABLE ── */
+  table.dt { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 9px; }
+  table.dt th { font-weight: 500; color: var(--text-muted); padding: 5px 9px; background: var(--surface2); border: 1px solid var(--border); text-align: left; }
+  table.dt td { padding: 5px 9px; border: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  table.dt tr:nth-child(even) td { background: var(--surface2); }
 
-  /* TABLES */
-  table.def-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 10px; }
-  table.def-table th {
-    font-weight: 500; color: var(--text-muted);
-    padding: 6px 10px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    text-align: left;
+  /* ── WEIGHT INPUTS ── */
+  .wgrid { display: flex; flex-direction: column; gap: 8px; }
+  .wrow  { display: flex; align-items: center; gap: 12px; }
+  .wrow label { font-size: 13px; min-width: 185px; color: var(--text); }
+  .wrow input[type=number] {
+    width: 62px; padding: 5px 7px; border: 1px solid var(--border-strong);
+    border-radius: 6px; font-size: 13px; font-family: 'DM Mono', monospace;
+    background: var(--surface); color: var(--text); text-align: center;
   }
-  table.def-table td {
-    padding: 6px 10px;
-    border: 1px solid var(--border);
-    vertical-align: top;
-    color: var(--text);
-  }
-  table.def-table tr:nth-child(even) td { background: #FAFAF8; }
+  .wrow input:focus { outline: 2px solid var(--blue-mid); }
+  .wsum { font-size: 12px; font-family: 'DM Mono', monospace; margin-top: 6px; margin-bottom: 18px; color: var(--text-muted); }
+  .wsum span { font-weight: 600; }
 
-  /* WEIGHT INPUTS */
-  .weight-grid { display: flex; flex-direction: column; gap: 8px; }
-  .weight-row { display: flex; align-items: center; gap: 12px; }
-  .weight-row label { font-size: 13px; min-width: 180px; color: var(--text); }
-  .weight-row input[type=number] {
-    width: 64px; padding: 5px 8px;
-    border: 1px solid var(--border-strong);
-    border-radius: 6px;
-    font-size: 13px; font-family: 'DM Mono', monospace;
-    background: var(--surface); color: var(--text);
-    text-align: center;
-  }
-  .weight-row input:focus { outline: 2px solid var(--blue-mid); }
-  .weight-sum {
-    font-size: 12px; font-family: 'DM Mono', monospace;
-    margin-top: 6px; margin-bottom: 20px;
-    color: var(--text-muted);
-  }
-  .weight-sum span { font-weight: 500; }
-
-  /* SCORING */
-  .add-row { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+  /* ── SCORE TABLE ── */
+  .add-row { display: flex; gap: 8px; align-items: center; margin-bottom: 13px; flex-wrap: wrap; }
   .add-row input[type=text] {
-    font-size: 13px; padding: 7px 12px;
-    border: 1px solid var(--border-strong);
-    border-radius: 8px;
-    background: var(--surface); color: var(--text);
-    width: 260px;
+    font-size: 13px; padding: 6px 11px;
+    border: 1px solid var(--border-strong); border-radius: 8px;
+    background: var(--surface); color: var(--text); width: 255px;
   }
-  .btn {
-    font-size: 12.5px; font-weight: 500;
-    padding: 7px 16px;
-    border: 1px solid var(--border-strong);
-    border-radius: 8px;
-    background: var(--surface); color: var(--text);
-    cursor: pointer; transition: all .12s;
-  }
+  .btn { font-size: 12.5px; font-weight: 500; padding: 7px 15px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); color: var(--text); cursor: pointer; transition: all .12s; }
   .btn:hover { background: var(--surface2); }
-  .btn.primary {
-    background: var(--accent); color: white;
-    border-color: var(--accent);
-    padding: 8px 22px; font-size: 13px;
-  }
+  .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); padding: 8px 22px; font-size: 13px; }
   .btn.primary:hover { background: #1e4a74; }
   .btn.danger { color: var(--red); border-color: transparent; }
   .btn.danger:hover { background: var(--red-bg); }
 
-  .scoring-wrap { overflow-x: auto; }
-  table.scoring-table { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
-  table.scoring-table th {
-    font-size: 11px; font-weight: 500;
-    padding: 8px 10px;
-    border-bottom: 2px solid var(--border);
-    text-align: left; color: var(--text-muted);
-  }
-  table.scoring-table th.th-b { color: var(--green); }
-  table.scoring-table th.th-f { color: var(--red); }
-  table.scoring-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-  table.scoring-table tbody tr:hover td { background: var(--surface2); }
-  .opp-name-cell { font-weight: 500; min-width: 150px; white-space: normal; }
+  .soverflow { overflow-x: auto; }
+  table.st { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
+  table.st th { font-size: 11px; font-weight: 500; padding: 7px 9px; border-bottom: 2px solid var(--border); text-align: center; color: var(--text-muted); }
+  table.st th.left { text-align: left; }
+  table.st th.g { color: var(--green); }
+  table.st th.r { color: var(--red); }
+  table.st td { padding: 7px 9px; border-bottom: 1px solid var(--border); vertical-align: middle; text-align: center; }
+  table.st td.left { text-align: left; font-weight: 500; min-width: 145px; white-space: normal; }
+  table.st tbody tr:hover td { background: var(--surface2); }
+  select.ss { font-size: 12px; padding: 3px 5px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface); color: var(--text); width: 48px; cursor: pointer; font-family: 'DM Mono', monospace; }
 
-  select.score-sel {
-    font-size: 12px; padding: 3px 6px;
-    border: 1px solid var(--border-strong);
-    border-radius: 6px;
-    background: var(--surface); color: var(--text);
-    cursor: pointer; width: 50px; text-align: center;
-    font-family: 'DM Mono', monospace;
-  }
+  /* ── DASHBOARD ── */
+  .ctrl { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .ctrl label { font-size: 12.5px; color: var(--text-muted); font-weight: 500; }
+  .ctrl select { font-size: 12.5px; padding: 6px 10px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); color: var(--text); cursor: pointer; }
 
-  /* RESULTS */
-  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(0,1fr)); gap: 10px; margin-bottom: 20px; }
-  .kpi-card { background: var(--surface2); border-radius: var(--radius); padding: 12px 16px; }
-  .kpi-card .kpi-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
-  .kpi-card .kpi-value { font-size: 22px; font-weight: 600; color: var(--text); line-height: 1.2; }
-  .kpi-card .kpi-sub { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+  .kgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(0,1fr)); gap: 10px; margin-bottom: 16px; }
+  .kcard { background: var(--surface2); border-radius: var(--radius); padding: 12px 15px; }
+  .kcard .kl { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+  .kcard .kv { font-size: 21px; font-weight: 600; line-height: 1.2; }
+  .kcard .ks { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
 
-  table.results-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  table.results-table th {
-    font-size: 11px; font-weight: 500;
-    padding: 8px 12px;
-    border-bottom: 2px solid var(--border);
-    text-align: left; color: var(--text-muted);
-    white-space: nowrap;
-  }
-  table.results-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-  table.results-table tbody tr:hover td { background: var(--surface2); }
+  .leg-row { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--text-muted); align-items: center; margin-top: 12px; }
+  .swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 4px; vertical-align: middle; }
 
-  .badge {
-    display: inline-block; font-size: 12px; font-weight: 500;
-    padding: 3px 10px; border-radius: 99px;
-    font-family: 'DM Mono', monospace;
-  }
-  .rank-chip {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 26px; height: 26px; border-radius: 50%;
-    font-size: 12px; font-weight: 600;
-    background: var(--surface2); color: var(--text-muted);
-  }
-  .rank-1 { background: #FAEEDA; color: #854F0B; }
-  .rank-2 { background: #E0DFDB; color: #444441; }
-  .rank-3 { background: #FAECE7; color: #993C1D; }
+  .qlgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .qlcard { background: var(--surface2); border-radius: var(--radius); padding: 10px 14px; }
+  .qlcard .qt { font-weight: 500; color: var(--text); font-size: 13px; margin-bottom: 3px; }
+  .qlcard .qd { color: var(--text-muted); font-size: 12px; }
 
-  .dot {
-    display: inline-block; width: 9px; height: 9px;
-    border-radius: 50%; margin-right: 2px;
-  }
-  .legend {
-    margin-top: 14px; font-size: 11.5px; color: var(--text-faint);
-    line-height: 1.9;
-  }
+  /* ── RESULTS ── */
+  .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 2px 9px; border-radius: 99px; font-family: 'DM Mono', monospace; }
+  .rchip { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; font-size: 12px; font-weight: 600; background: var(--surface2); color: var(--text-muted); }
+  .rchip.r1 { background: #FAEEDA; color: #854F0B; }
+  .rchip.r2 { background: #D3D1C7; color: #444441; }
+  .rchip.r3 { background: #FAECE7; color: #993C1D; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 2px; }
 
-  .export-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
-  .export-bar span { font-size: 12px; color: var(--text-muted); }
+  table.rt { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.rt th { font-size: 11px; font-weight: 500; padding: 8px 11px; border-bottom: 2px solid var(--border); text-align: left; color: var(--text-muted); white-space: nowrap; }
+  table.rt td { padding: 8px 11px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  table.rt tbody tr:hover td { background: var(--surface2); }
+  .legend-note { margin-top: 14px; font-size: 11.5px; color: var(--text-faint); line-height: 1.9; }
 
   @media (max-width: 640px) {
-    .container { padding: 16px 12px 40px; }
-    .header { padding: 14px 16px; }
-    .tab { padding: 6px 12px; font-size: 12px; }
-    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .wrap { padding: 16px 12px 48px; }
+    .hdr  { padding: 13px 16px; }
+    .tab  { padding: 6px 11px; font-size: 12px; }
+    .kgrid  { grid-template-columns: 1fr 1fr; }
+    .qlgrid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
 
-<header class="header">
-  <div class="header-icon">
+<header class="hdr">
+  <div class="hdr-icon">
     <svg viewBox="0 0 20 20"><path d="M3 4h14v2H3zm0 4h10v2H3zm0 4h12v2H3z"/></svg>
   </div>
-  <div class="header-text">
+  <div class="hdr-title">
     <h1>Operational Opportunity Matrix</h1>
     <p>Midstream Oil &amp; Gas — Prioritization Framework</p>
   </div>
-  <div class="header-badge">v1.0</div>
+  <div class="hdr-badge">v2.0</div>
 </header>
 
-<div class="container">
-  <div class="tab-bar">
-    <div class="tab active" onclick="switchTab('definitions')">Criteria &amp; Definitions</div>
-    <div class="tab" onclick="switchTab('weights')">Weights</div>
-    <div class="tab" onclick="switchTab('scoring')">Score Opportunities</div>
-    <div class="tab" onclick="switchTab('results')">Results &amp; Ranking</div>
+<div class="wrap">
+  <div class="tabs">
+    <div class="tab on"  onclick="sw('def')">Criteria &amp; Definitions</div>
+    <div class="tab"     onclick="sw('wt')">Weights</div>
+    <div class="tab"     onclick="sw('sc')">Score Opportunities</div>
+    <div class="tab"     onclick="sw('dash')">Dashboard</div>
+    <div class="tab"     onclick="sw('res')">Results &amp; Ranking</div>
   </div>
 
-  <!-- DEFINITIONS -->
-  <div class="panel active" id="panel-definitions">
+  <!-- ═══ DEFINITIONS ═══ -->
+  <div class="pnl on" id="pnl-def">
     <div class="card">
-      <div class="info-box">
-        Seven criteria split into two composite scores. <strong>Benefit</strong> captures operational value; <strong>Friction</strong> captures execution difficulty. All criteria scored 1–5 (1 = very low, 5 = very high).
-      </div>
+      <div class="info">Seven criteria → two composite scores. <strong>Benefit</strong> = operational value. <strong>Friction</strong> = execution difficulty. All scored 1–5.</div>
+      <div class="slabel g">Benefit criteria — what the opportunity delivers</div>
 
-      <div class="section-label green">Benefit criteria — what the opportunity delivers</div>
-
-      <details class="criteria" open>
+      <details class="crit" open>
         <summary>Impact</summary>
-        <div class="criteria-body">
-          <table class="def-table">
-            <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
-            <tr><td>1</td><td>Negligible operational effect</td><td>Minor admin workflow tweak</td></tr>
-            <tr><td>2</td><td>Limited improvement, narrow scope</td><td>Single terminal throughput +1%</td></tr>
-            <tr><td>3</td><td>Moderate gain affecting one asset class</td><td>Pipeline compression efficiency +5%</td></tr>
-            <tr><td>4</td><td>Significant gain, multi-asset or network-level</td><td>NGL recovery improvement across a system</td></tr>
-            <tr><td>5</td><td>Transformational, enterprise-wide effect</td><td>Real-time SCADA optimization reducing unplanned shutdowns &gt;20%</td></tr>
-          </table>
-        </div>
+        <div class="cbody"><table class="dt">
+          <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
+          <tr><td>1</td><td>Negligible operational effect</td><td>Minor admin workflow tweak</td></tr>
+          <tr><td>2</td><td>Limited improvement, narrow scope</td><td>Single terminal throughput +1%</td></tr>
+          <tr><td>3</td><td>Moderate gain, one asset class</td><td>Pipeline compression efficiency +5%</td></tr>
+          <tr><td>4</td><td>Significant gain, multi-asset or network</td><td>NGL recovery improvement across a system</td></tr>
+          <tr><td>5</td><td>Transformational, enterprise-wide</td><td>SCADA optimization — unplanned shutdowns &gt;20% reduction</td></tr>
+        </table></div>
       </details>
-
-      <details class="criteria">
+      <details class="crit">
         <summary>Criticality</summary>
-        <div class="criteria-body">
-          <table class="def-table">
-            <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
-            <tr><td>1</td><td>Nice-to-have, no compliance/safety link</td><td>Reporting dashboard beautification</td></tr>
-            <tr><td>2</td><td>Operationally useful but deferrable</td><td>Predictive scheduling for truck dispatch</td></tr>
-            <tr><td>3</td><td>Important for reliability or regulatory posture</td><td>Leak detection model on a gathering line</td></tr>
-            <tr><td>4</td><td>High criticality — failure has financial/regulatory consequence</td><td>Cathodic protection monitoring</td></tr>
-            <tr><td>5</td><td>Safety/compliance mandatory; deferral = liability</td><td>PHMSA-mandated integrity management program</td></tr>
-          </table>
-        </div>
+        <div class="cbody"><table class="dt">
+          <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
+          <tr><td>1</td><td>Nice-to-have, no compliance/safety link</td><td>Reporting dashboard beautification</td></tr>
+          <tr><td>2</td><td>Operationally useful but deferrable</td><td>Predictive scheduling for truck dispatch</td></tr>
+          <tr><td>3</td><td>Important for reliability or regulatory posture</td><td>Leak detection model on gathering line</td></tr>
+          <tr><td>4</td><td>High criticality — financial/regulatory consequence</td><td>Cathodic protection monitoring</td></tr>
+          <tr><td>5</td><td>Safety/compliance mandatory — deferral = liability</td><td>PHMSA-mandated integrity management program</td></tr>
+        </table></div>
       </details>
-
-      <details class="criteria">
+      <details class="crit">
         <summary>Value potential ($)</summary>
-        <div class="criteria-body">
-          <table class="def-table">
-            <tr><th>Score</th><th>Annual EBITDA contribution</th><th>Midstream example</th></tr>
-            <tr><td>1</td><td>&lt; $250K</td><td>Route optimization for one fleet</td></tr>
-            <tr><td>2</td><td>$250K – $1M</td><td>Fuel gas optimization on a compressor station</td></tr>
-            <tr><td>3</td><td>$1M – $5M</td><td>Throughput uplift on a gathering system</td></tr>
-            <tr><td>4</td><td>$5M – $20M</td><td>Fractionator yield improvement</td></tr>
-            <tr><td>5</td><td>&gt; $20M</td><td>Major pipeline capacity release or tariff optimization</td></tr>
-          </table>
-        </div>
+        <div class="cbody"><table class="dt">
+          <tr><th>Score</th><th>Annual EBITDA contribution</th><th>Midstream example</th></tr>
+          <tr><td>1</td><td>&lt; $250K</td><td>Route optimization for one fleet</td></tr>
+          <tr><td>2</td><td>$250K – $1M</td><td>Fuel gas optimization on a compressor station</td></tr>
+          <tr><td>3</td><td>$1M – $5M</td><td>Throughput uplift on gathering system</td></tr>
+          <tr><td>4</td><td>$5M – $20M</td><td>Fractionator yield improvement</td></tr>
+          <tr><td>5</td><td>&gt; $20M</td><td>Pipeline capacity release or tariff optimization</td></tr>
+        </table></div>
       </details>
 
-      <div class="section-label red" style="margin-top:22px">Friction criteria — what it costs to execute</div>
-
-      <details class="criteria">
+      <div class="slabel r" style="margin-top:20px">Friction criteria — what it costs to execute</div>
+      <details class="crit">
         <summary>Level of difficulty / ease of implementation</summary>
-        <div class="criteria-body">
-          <table class="def-table">
-            <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
-            <tr><td>1</td><td>Very easy — off-the-shelf, no integration required</td><td>Commercial SaaS ERP module</td></tr>
-            <tr><td>2</td><td>Low complexity — minor config, existing data</td><td>Dashboard built on existing historian</td></tr>
-            <tr><td>3</td><td>Moderate — some integration, vendor support needed</td><td>Predictive maintenance with new sensors</td></tr>
-            <tr><td>4</td><td>High complexity — custom build or major IT change</td><td>ML model requiring new data pipeline</td></tr>
-            <tr><td>5</td><td>Very high — multi-system overhaul or greenfield</td><td>Enterprise SCADA replacement</td></tr>
-          </table>
-        </div>
+        <div class="cbody"><table class="dt">
+          <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
+          <tr><td>1</td><td>Very easy — off-the-shelf, no integration</td><td>Commercial SaaS ERP module</td></tr>
+          <tr><td>2</td><td>Low complexity — minor config, existing data</td><td>Dashboard on existing historian</td></tr>
+          <tr><td>3</td><td>Moderate — some integration, vendor support</td><td>Predictive maintenance with new sensors</td></tr>
+          <tr><td>4</td><td>High — custom build or major IT change</td><td>ML model requiring new data pipeline</td></tr>
+          <tr><td>5</td><td>Very high — multi-system overhaul or greenfield</td><td>Enterprise SCADA replacement</td></tr>
+        </table></div>
       </details>
-
-      <details class="criteria">
+      <details class="crit">
         <summary>Time to value</summary>
-        <div class="criteria-body">
-          <table class="def-table">
-            <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
-            <tr><td>1</td><td>&lt; 1 month</td><td>Quick-config reporting change</td></tr>
-            <tr><td>2</td><td>1–3 months</td><td>Pilot on one compressor station</td></tr>
-            <tr><td>3</td><td>3–6 months</td><td>New measurement and analytics layer</td></tr>
-            <tr><td>4</td><td>6–12 months</td><td>Full network optimization rollout</td></tr>
-            <tr><td>5</td><td>&gt; 12 months</td><td>Multi-phase infrastructure program</td></tr>
-          </table>
-        </div>
+        <div class="cbody"><table class="dt">
+          <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
+          <tr><td>1</td><td>&lt; 1 month</td><td>Quick-config reporting change</td></tr>
+          <tr><td>2</td><td>1–3 months</td><td>Pilot on one compressor station</td></tr>
+          <tr><td>3</td><td>3–6 months</td><td>New measurement and analytics layer</td></tr>
+          <tr><td>4</td><td>6–12 months</td><td>Full network optimization rollout</td></tr>
+          <tr><td>5</td><td>&gt; 12 months</td><td>Multi-phase infrastructure program</td></tr>
+        </table></div>
       </details>
-
-      <details class="criteria">
+      <details class="crit">
         <summary>Risk / complexity</summary>
-        <div class="criteria-body">
-          <table class="def-table">
-            <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
-            <tr><td>1</td><td>Proven solution, near-zero execution risk</td><td>Vendor-certified metering upgrade</td></tr>
-            <tr><td>2</td><td>Low risk — minor unknowns, good analogues</td><td>Scheduling algorithm with similar case studies</td></tr>
-            <tr><td>3</td><td>Moderate risk — some technology or process uncertainty</td><td>First-of-kind digital twin for a segment</td></tr>
-            <tr><td>4</td><td>High risk — novel approach, limited precedent</td><td>AI-driven autonomous control on live pipeline</td></tr>
-            <tr><td>5</td><td>Very high — regulatory, technology, and change-mgmt risk all present</td><td>Cross-company data sharing platform</td></tr>
-          </table>
-        </div>
+        <div class="cbody"><table class="dt">
+          <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
+          <tr><td>1</td><td>Proven solution, near-zero execution risk</td><td>Vendor-certified metering upgrade</td></tr>
+          <tr><td>2</td><td>Low risk — minor unknowns, good analogues</td><td>Scheduling algorithm with case studies</td></tr>
+          <tr><td>3</td><td>Moderate risk — some technology uncertainty</td><td>First-of-kind digital twin for a segment</td></tr>
+          <tr><td>4</td><td>High risk — novel approach, limited precedent</td><td>AI autonomous control on live pipeline</td></tr>
+          <tr><td>5</td><td>Very high — reg + tech + change-mgmt risk</td><td>Cross-company data sharing platform</td></tr>
+        </table></div>
       </details>
-
-      <details class="criteria">
+      <details class="crit">
         <summary>Dependencies</summary>
-        <div class="criteria-body">
-          <table class="def-table">
-            <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
-            <tr><td>1</td><td>Standalone — no external dependencies</td><td>Internal ops report</td></tr>
-            <tr><td>2</td><td>Minor — 1–2 internal approvals</td><td>Data access request to IT</td></tr>
-            <tr><td>3</td><td>Moderate — cross-functional or minor vendor dependency</td><td>Requires engineering, ops, and IT alignment</td></tr>
-            <tr><td>4</td><td>High — external partners, regulatory, or contract dependencies</td><td>Shipper agreement or FERC filing needed</td></tr>
-            <tr><td>5</td><td>Very high — JV partner, third-party infrastructure, multi-regulator</td><td>Interconnect expansion needing 3 counterparty approvals</td></tr>
-          </table>
-        </div>
+        <div class="cbody"><table class="dt">
+          <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
+          <tr><td>1</td><td>Standalone — no external dependencies</td><td>Internal ops report</td></tr>
+          <tr><td>2</td><td>Minor — 1–2 internal approvals</td><td>Data access request to IT</td></tr>
+          <tr><td>3</td><td>Moderate — cross-functional or minor vendor</td><td>Engineering + ops + IT alignment needed</td></tr>
+          <tr><td>4</td><td>High — external partners, regulatory, contractual</td><td>Shipper agreement or FERC filing needed</td></tr>
+          <tr><td>5</td><td>Very high — JV / third-party infra / multi-regulator</td><td>Interconnect needing 3 counterparty approvals</td></tr>
+        </table></div>
       </details>
     </div>
   </div>
 
-  <!-- WEIGHTS -->
-  <div class="panel" id="panel-weights">
+  <!-- ═══ WEIGHTS ═══ -->
+  <div class="pnl" id="pnl-wt">
     <div class="card">
-      <div class="formula-box">
-        <b>Benefit score</b> = weighted avg of Impact, Criticality, Value ($)<br>
-        <b>Friction score</b> = weighted avg of Difficulty, Time to value, Risk, Dependencies<br>
-        <b>Priority score</b> = Benefit × (6 − Friction) &nbsp;— rewards high benefit + low friction<br>
-        <b>Priority index</b> = Benefit ÷ Friction &nbsp;— pure bang-for-buck ratio<br>
-        <b>Priority rank</b> = ranked descending by Priority score
+      <div class="formula">
+        <b>Benefit score</b>   = weighted avg of Impact, Criticality, Value ($)<br>
+        <b>Friction score</b>  = weighted avg of Difficulty, Time to value, Risk, Dependencies<br>
+        <b>Priority score</b>  = Benefit × (6 − Friction) — rewards high benefit + low friction<br>
+        <b>Priority index</b>  = Benefit ÷ Friction — pure bang-for-buck ratio<br>
+        <b>Priority rank</b>   = ranked descending by Priority score
       </div>
-
-      <div class="section-label green">Benefit weights (must sum to 100%)</div>
-      <div class="weight-grid">
-        <div class="weight-row"><label>Impact</label><input type="number" id="w-impact" min="0" max="100" value="35"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
-        <div class="weight-row"><label>Criticality</label><input type="number" id="w-crit" min="0" max="100" value="30"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
-        <div class="weight-row"><label>Value potential ($)</label><input type="number" id="w-value" min="0" max="100" value="35"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+      <div class="slabel g">Benefit weights (must sum to 100%)</div>
+      <div class="wgrid">
+        <div class="wrow"><label>Impact</label>          <input type="number" id="wi"   min="0" max="100" value="35"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+        <div class="wrow"><label>Criticality</label>     <input type="number" id="wc"   min="0" max="100" value="30"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+        <div class="wrow"><label>Value potential ($)</label><input type="number" id="wv" min="0" max="100" value="35"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
       </div>
-      <div class="weight-sum">Sum: <span id="bsum">100%</span></div>
-
-      <div class="section-label red">Friction weights (must sum to 100%)</div>
-      <div class="weight-grid">
-        <div class="weight-row"><label>Difficulty</label><input type="number" id="w-diff" min="0" max="100" value="25"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
-        <div class="weight-row"><label>Time to value</label><input type="number" id="w-time" min="0" max="100" value="25"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
-        <div class="weight-row"><label>Risk / complexity</label><input type="number" id="w-risk" min="0" max="100" value="30"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
-        <div class="weight-row"><label>Dependencies</label><input type="number" id="w-dep" min="0" max="100" value="20"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+      <div class="wsum">Sum: <span id="bsum">100%</span></div>
+      <div class="slabel r">Friction weights (must sum to 100%)</div>
+      <div class="wgrid">
+        <div class="wrow"><label>Difficulty</label>      <input type="number" id="wd"   min="0" max="100" value="25"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+        <div class="wrow"><label>Time to value</label>   <input type="number" id="wt"   min="0" max="100" value="25"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+        <div class="wrow"><label>Risk / complexity</label><input type="number" id="wr"  min="0" max="100" value="30"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+        <div class="wrow"><label>Dependencies</label>    <input type="number" id="wdep" min="0" max="100" value="20"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
       </div>
-      <div class="weight-sum">Sum: <span id="fsum">100%</span></div>
+      <div class="wsum">Sum: <span id="fsum">100%</span></div>
     </div>
   </div>
 
-  <!-- SCORING -->
-  <div class="panel" id="panel-scoring">
+  <!-- ═══ SCORING ═══ -->
+  <div class="pnl" id="pnl-sc">
     <div class="card">
       <div class="add-row">
-        <input type="text" id="new-name" placeholder="Opportunity name..." />
+        <input type="text" id="nname" placeholder="Opportunity name..." />
         <button class="btn" onclick="addOpp()">+ Add opportunity</button>
       </div>
-      <div class="scoring-wrap">
-        <table class="scoring-table" id="scoring-table">
-          <thead>
-            <tr>
-              <th style="min-width:150px">Opportunity</th>
-              <th class="th-b">Impact</th>
-              <th class="th-b">Criticality</th>
-              <th class="th-b">Value ($)</th>
-              <th class="th-f">Difficulty</th>
-              <th class="th-f">Time</th>
-              <th class="th-f">Risk</th>
-              <th class="th-f">Dependencies</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="scoring-body"></tbody>
+      <div class="soverflow">
+        <table class="st">
+          <thead><tr>
+            <th class="left" style="min-width:150px">Opportunity</th>
+            <th class="g">Impact</th><th class="g">Criticality</th><th class="g">Value ($)</th>
+            <th class="r">Difficulty</th><th class="r">Time</th><th class="r">Risk</th><th class="r">Dependencies</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="sbody"></tbody>
         </table>
       </div>
       <div style="margin-top:16px">
-        <button class="btn primary" onclick="calculate()">Calculate &amp; rank →</button>
+        <button class="btn primary" onclick="calc()">Calculate &amp; rank →</button>
       </div>
     </div>
   </div>
 
-  <!-- RESULTS -->
-  <div class="panel" id="panel-results">
-    <div id="results-area">
-      <div class="card" style="color:var(--text-muted);font-size:13px">
-        Score at least one opportunity, then click "Calculate &amp; rank" in the Scoring tab.
+  <!-- ═══ DASHBOARD ═══ -->
+  <div class="pnl" id="pnl-dash">
+    <div class="card">
+      <div class="ctrl">
+        <label>Bubble size =</label>
+        <select id="bsel" onchange="renderDash()">
+          <option value="priority">Priority score</option>
+          <option value="index">Priority index</option>
+          <option value="impact">Impact</option>
+          <option value="criticality">Criticality</option>
+          <option value="value">Value potential ($)</option>
+          <option value="difficulty">Difficulty</option>
+          <option value="time">Time to value</option>
+          <option value="risk">Risk / complexity</option>
+          <option value="dependencies">Dependencies</option>
+        </select>
+        <label>Color =</label>
+        <select id="csel" onchange="renderDash()">
+          <option value="rank">Priority rank (each opportunity)</option>
+          <option value="benefit">Benefit zone</option>
+          <option value="friction">Friction zone</option>
+        </select>
       </div>
+      <div class="kgrid" id="dash-kpis"></div>
+      <div style="position:relative;width:100%;height:440px">
+        <canvas id="bubbleChart"></canvas>
+      </div>
+      <div class="leg-row" id="bubble-leg"></div>
+      <div class="qlgrid" id="qlabels"></div>
+      <p id="dash-empty" style="display:none;font-size:13px;color:var(--text-muted);padding:16px 0">
+        Score opportunities first, then click "Calculate &amp; rank" in the Score tab.
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══ RESULTS ═══ -->
+  <div class="pnl" id="pnl-res">
+    <div id="res-area">
+      <div class="card" style="color:var(--text-muted);font-size:13px">Score opportunities and click "Calculate &amp; rank" in the Score tab first.</div>
     </div>
   </div>
 </div>
 
 <script>
+/* ── DATA ── */
 let opps = [
-  {name:"Real-time pipeline optimization", s:[5,4,5,4,4,4,3]},
-  {name:"NGL fractionation yield uplift", s:[4,3,5,3,3,3,2]},
+  {name:"Real-time pipeline optimization",     s:[5,4,5,4,4,4,3]},
+  {name:"NGL fractionation yield uplift",       s:[4,3,5,3,3,3,2]},
   {name:"Compressor station fuel optimization", s:[3,2,3,2,2,2,1]},
-  {name:"Leak detection ML model rollout", s:[4,5,4,4,3,4,3]},
-  {name:"Throughput scheduling automation", s:[3,3,3,2,2,2,2]},
+  {name:"Leak detection ML model rollout",      s:[4,5,4,4,3,4,3]},
+  {name:"Throughput scheduling automation",     s:[3,3,3,2,2,2,2]},
 ];
+let results = [];
+let bubbleInst = null;
 
-function switchTab(t) {
-  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(el => el.classList.remove('active'));
-  document.querySelector('[onclick="switchTab(\''+t+'\')"]').classList.add('active');
-  document.getElementById('panel-'+t).classList.add('active');
-  if (t === 'scoring') renderScoring();
+const PALETTE = ['#185FA5','#3B6D11','#993C1D','#854F0B','#0F6E56','#534AB7','#D4537E','#639922','#D85A30','#1D9E75'];
+
+/* ── TAB SWITCH ── */
+function sw(t) {
+  document.querySelectorAll('.tab').forEach(e => e.classList.remove('on'));
+  document.querySelectorAll('.pnl').forEach(e => e.classList.remove('on'));
+  document.querySelector('[onclick="sw(\''+t+'\')"]').classList.add('on');
+  document.getElementById('pnl-'+t).classList.add('on');
+  if (t === 'sc')   renderScoring();
+  if (t === 'dash') renderDash();
 }
 
+/* ── WEIGHTS ── */
 function getW() {
   return {
-    bw: [+document.getElementById('w-impact').value, +document.getElementById('w-crit').value, +document.getElementById('w-value').value],
-    fw: [+document.getElementById('w-diff').value, +document.getElementById('w-time').value, +document.getElementById('w-risk').value, +document.getElementById('w-dep').value]
+    bw: [+wi.value, +wc.value, +wv.value],
+    fw: [+wd.value, +wt.value, +wr.value, +wdep.value]
   };
 }
-
 function updateSums() {
-  const {bw, fw} = getW();
+  const {bw,fw} = getW();
   const bs = bw.reduce((a,b)=>a+b,0), fs = fw.reduce((a,b)=>a+b,0);
-  const bel = document.getElementById('bsum'), fel = document.getElementById('fsum');
-  bel.textContent = bs+'%'; bel.style.color = bs===100?'#3B6D11':'#993C1D';
-  fel.textContent = fs+'%'; fel.style.color = fs===100?'#3B6D11':'#993C1D';
+  bsum.textContent = bs+'%'; bsum.style.color = bs===100?'#3B6D11':'#993C1D';
+  fsum.textContent = fs+'%'; fsum.style.color = fs===100?'#3B6D11':'#993C1D';
 }
 document.querySelectorAll('input[type=number]').forEach(i => i.addEventListener('input', updateSums));
 updateSums();
 
-function mkSelect(i, fi) {
+/* ── SCORING ── */
+function mkSel(i, fi) {
   let o = '';
   for (let v=1;v<=5;v++) o += `<option value="${v}"${opps[i].s[fi]===v?' selected':''}>${v}</option>`;
-  return `<select class="score-sel" onchange="opps[${i}].s[${fi}]=+this.value">${o}</select>`;
+  return `<select class="ss" onchange="opps[${i}].s[${fi}]=+this.value">${o}</select>`;
 }
-
 function renderScoring() {
-  const tbody = document.getElementById('scoring-body');
-  tbody.innerHTML = opps.map((opp, i) => `
+  sbody.innerHTML = opps.map((o,i) => `
     <tr>
-      <td class="opp-name-cell">${opp.name}</td>
-      ${[0,1,2,3,4,5,6].map(fi => `<td>${mkSelect(i,fi)}</td>`).join('')}
+      <td class="left">${o.name}</td>
+      ${[0,1,2,3,4,5,6].map(fi=>`<td>${mkSel(i,fi)}</td>`).join('')}
       <td><button class="btn danger" onclick="opps.splice(${i},1);renderScoring()">✕</button></td>
     </tr>`).join('');
 }
-
 function addOpp() {
-  const inp = document.getElementById('new-name');
+  const inp = document.getElementById('nname');
   const name = inp.value.trim() || 'New opportunity '+(opps.length+1);
   opps.push({name, s:[3,3,3,3,3,3,3]});
   inp.value = '';
   renderScoring();
 }
 
-function scoreColor(v, hi) {
-  if (!hi) {
+/* ── CALCULATE ── */
+function calc() {
+  const {bw,fw} = getW();
+  if (bw.reduce((a,b)=>a+b,0)!==100 || fw.reduce((a,b)=>a+b,0)!==100) {
+    alert('Weights must each sum to 100%. Please adjust in the Weights tab.'); return;
+  }
+  results = opps.map(o => {
+    const s = o.s;
+    const benefit  = (s[0]*bw[0]+s[1]*bw[1]+s[2]*bw[2])/100;
+    const friction = (s[3]*fw[0]+s[4]*fw[1]+s[5]*fw[2]+s[6]*fw[3])/100;
+    return {name:o.name, s, benefit, friction, priority:benefit*(6-friction), index:benefit/friction};
+  });
+  results.sort((a,b) => b.priority-a.priority);
+  results.forEach((r,i) => r.rank = i+1);
+  renderResults();
+  renderDash();
+  sw('dash');
+}
+
+/* ── BADGE COLOR ── */
+function bc(v, inv) {
+  if (!inv) {
     if (v>=4.2) return {bg:'#EAF3DE',col:'#3B6D11'};
     if (v>=3.2) return {bg:'#E6F1FB',col:'#185FA5'};
     if (v>=2.2) return {bg:'#FAEEDA',col:'#854F0B'};
@@ -584,85 +525,191 @@ function scoreColor(v, hi) {
   }
 }
 
-function calculate() {
-  const {bw, fw} = getW();
-  if (bw.reduce((a,b)=>a+b,0)!==100 || fw.reduce((a,b)=>a+b,0)!==100) {
-    alert('Weights must each sum to 100%. Please adjust in the Weights tab.'); return;
+/* ── DASHBOARD ── */
+function getSV(r, key) {
+  const m = {priority:r.priority,index:r.index*2,impact:r.s[0],criticality:r.s[1],value:r.s[2],difficulty:r.s[3],time:r.s[4],risk:r.s[5],dependencies:r.s[6]};
+  return m[key] ?? r.priority;
+}
+
+function renderDash() {
+  const empty = !results.length;
+  document.getElementById('dash-empty').style.display = empty ? 'block' : 'none';
+  if (empty) {
+    document.getElementById('dash-kpis').innerHTML = '';
+    document.getElementById('bubble-leg').innerHTML = '';
+    document.getElementById('qlabels').innerHTML = '';
+    if (bubbleInst) { bubbleInst.destroy(); bubbleInst = null; }
+    return;
   }
-  let res = opps.map(opp => {
-    const s = opp.s;
-    const benefit = (s[0]*bw[0]+s[1]*bw[1]+s[2]*bw[2])/100;
-    const friction = (s[3]*fw[0]+s[4]*fw[1]+s[5]*fw[2]+s[6]*fw[3])/100;
-    return {name:opp.name, s, benefit, friction, priority: benefit*(6-friction), index: benefit/friction};
+
+  const sKey = bsel.value;
+  const cKey = csel.value;
+  const avg  = k => (results.reduce((a,b)=>a+b[k],0)/results.length).toFixed(2);
+  const top  = results[0];
+
+  document.getElementById('dash-kpis').innerHTML = `
+    <div class="kcard"><div class="kl">Top priority</div><div class="kv" style="font-size:14px;line-height:1.4">${top.name}</div><div class="ks">Rank #1 opportunity</div></div>
+    <div class="kcard"><div class="kl">Opportunities</div><div class="kv">${results.length}</div><div class="ks">Total scored</div></div>
+    <div class="kcard"><div class="kl">Avg benefit</div><div class="kv">${avg('benefit')}</div><div class="ks">Out of 5.0</div></div>
+    <div class="kcard"><div class="kl">Avg friction</div><div class="kv">${avg('friction')}</div><div class="ks">Out of 5.0</div></div>
+  `;
+
+  const sVals = results.map(r => getSV(r, sKey));
+  const minS  = Math.min(...sVals), maxS = Math.max(...sVals);
+  const scaleR = v => minS===maxS ? 20 : 12+((v-minS)/(maxS-minS))*30;
+
+  const pt = r => ({
+    x: +r.benefit.toFixed(2), y: +r.friction.toFixed(2),
+    r: scaleR(getSV(r, sKey)),
+    name: r.name, rank: r.rank,
+    priority: r.priority.toFixed(2), index: r.index.toFixed(2)
   });
-  res.sort((a,b)=>b.priority-a.priority);
-  res.forEach((r,i)=>r.rank=i+1);
 
-  const avg = (key) => (res.reduce((a,b)=>a+b[key],0)/res.length).toFixed(2);
-  const top = res[0];
+  let datasets, legHTML;
+  if (cKey === 'rank') {
+    datasets = results.map((r,i) => ({
+      label: r.name,
+      data: [pt(r)],
+      backgroundColor: PALETTE[i%PALETTE.length]+'CC',
+      borderColor:     PALETTE[i%PALETTE.length], borderWidth:1.5
+    }));
+    legHTML = results.map((r,i) =>
+      `<span style="display:flex;align-items:center;gap:5px"><span class="swatch" style="background:${PALETTE[i%PALETTE.length]}"></span>#${r.rank} ${r.name}</span>`).join('');
+  } else if (cKey === 'benefit') {
+    const z = [
+      {l:'High benefit (≥ 3.5)', c:'#3B6D11', f:r=>r.benefit>=3.5},
+      {l:'Mid benefit (2.5–3.5)', c:'#854F0B', f:r=>r.benefit>=2.5&&r.benefit<3.5},
+      {l:'Low benefit (< 2.5)',   c:'#993C1D', f:r=>r.benefit<2.5}
+    ];
+    datasets = z.map(z=>({label:z.l,data:results.filter(z.f).map(pt),backgroundColor:z.c+'CC',borderColor:z.c,borderWidth:1.5})).filter(d=>d.data.length);
+    legHTML  = z.map(z=>`<span style="display:flex;align-items:center;gap:5px"><span class="swatch" style="background:${z.c}"></span>${z.l}</span>`).join('');
+  } else {
+    const z = [
+      {l:'Low friction (< 2.5)',   c:'#3B6D11', f:r=>r.friction<2.5},
+      {l:'Mid friction (2.5–3.5)', c:'#854F0B', f:r=>r.friction>=2.5&&r.friction<3.5},
+      {l:'High friction (≥ 3.5)',  c:'#993C1D', f:r=>r.friction>=3.5}
+    ];
+    datasets = z.map(z=>({label:z.l,data:results.filter(z.f).map(pt),backgroundColor:z.c+'CC',borderColor:z.c,borderWidth:1.5})).filter(d=>d.data.length);
+    legHTML  = z.map(z=>`<span style="display:flex;align-items:center;gap:5px"><span class="swatch" style="background:${z.c}"></span>${z.l}</span>`).join('');
+  }
 
-  const dotColors = {
-    b: ['#C0DD97','#97C459','#639922','#3B6D11','#27500A'],
-    f: ['#F7C1C1','#F09595','#E24B4A','#A32D2D','#791F1F']
-  };
+  document.getElementById('bubble-leg').innerHTML = legHTML;
+  document.getElementById('qlabels').innerHTML = `
+    <div class="qlcard"><div class="qt">High benefit / Low friction</div><div class="qd">Quick wins — prioritize immediately</div></div>
+    <div class="qlcard"><div class="qt">High benefit / High friction</div><div class="qd">Strategic bets — plan carefully</div></div>
+    <div class="qlcard"><div class="qt">Low benefit / Low friction</div><div class="qd">Fill-ins — do if bandwidth allows</div></div>
+    <div class="qlcard"><div class="qt">Low benefit / High friction</div><div class="qd">Avoid or defer</div></div>
+  `;
 
-  let html = `
-    <div class="kpi-grid">
-      <div class="kpi-card"><div class="kpi-label">Top priority</div><div class="kpi-value" style="font-size:15px;line-height:1.4">${top.name}</div><div class="kpi-sub">Rank #1 opportunity</div></div>
-      <div class="kpi-card"><div class="kpi-label">Opportunities</div><div class="kpi-value">${res.length}</div><div class="kpi-sub">Total scored</div></div>
-      <div class="kpi-card"><div class="kpi-label">Avg benefit</div><div class="kpi-value">${avg('benefit')}</div><div class="kpi-sub">Out of 5.0</div></div>
-      <div class="kpi-card"><div class="kpi-label">Avg friction</div><div class="kpi-value">${avg('friction')}</div><div class="kpi-sub">Out of 5.0</div></div>
+  const isDark  = matchMedia('(prefers-color-scheme: dark)').matches;
+  const gridCol = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+  const textCol = isDark ? '#9A9890' : '#6B6860';
+  const lineCol = isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.15)';
+  const lblCol  = isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.18)';
+
+  const sLabel = {priority:'Priority score',index:'Priority index ×2',impact:'Impact',criticality:'Criticality',value:'Value potential ($)',difficulty:'Difficulty',time:'Time to value',risk:'Risk',dependencies:'Dependencies'}[sKey];
+
+  if (bubbleInst) { bubbleInst.destroy(); bubbleInst = null; }
+
+  bubbleInst = new Chart(document.getElementById('bubbleChart'), {
+    type: 'bubble',
+    data: {datasets},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      layout: {padding:{top:26,right:26,bottom:8,left:8}},
+      plugins: {
+        legend: {display:false},
+        tooltip: {
+          callbacks: {
+            title: () => '',
+            label(ctx) {
+              const d   = ctx.raw;
+              const nm  = cKey==='rank' ? ctx.dataset.label : (d.name||ctx.dataset.label);
+              return [`${nm}`,`Benefit: ${d.x}   Friction: ${d.y}`,`Priority: ${d.priority}   Index: ${d.index}×`,`Rank: #${d.rank}`,`Bubble size = ${sLabel}`];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {min:0.5,max:5.5,title:{display:true,text:'Benefit score  →',color:textCol,font:{size:12}},ticks:{color:textCol,stepSize:1},grid:{color:gridCol},border:{display:false}},
+        y: {min:0.5,max:5.5,title:{display:true,text:'Friction score  ↑',color:textCol,font:{size:12}},ticks:{color:textCol,stepSize:1},grid:{color:gridCol},border:{display:false}}
+      }
+    },
+    plugins: [{
+      id: 'quadLines',
+      afterDraw(chart) {
+        const {ctx, scales:{x,y}, chartArea:{left,right,top,bottom}} = chart;
+        const mx = x.getPixelForValue(3), my = y.getPixelForValue(3);
+        ctx.save();
+        ctx.setLineDash([5,5]); ctx.strokeStyle = lineCol; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(mx,top);  ctx.lineTo(mx,bottom); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(left,my); ctx.lineTo(right,my);  ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.font = '11px DM Sans,sans-serif'; ctx.fillStyle = lblCol;
+        ctx.fillText('Quick wins',     left+8, top+16);
+        ctx.fillText('Strategic bets', mx+8,   top+16);
+        ctx.fillText('Fill-ins',       left+8, my+16);
+        ctx.fillText('Avoid / defer',  mx+8,   my+16);
+        ctx.restore();
+      }
+    }]
+  });
+}
+
+/* ── RESULTS ── */
+function renderResults() {
+  if (!results.length) return;
+  const dotB = ['#C0DD97','#97C459','#639922','#3B6D11','#27500A'];
+  const dotF = ['#F7C1C1','#F09595','#E24B4A','#A32D2D','#791F1F'];
+  const avg  = k => (results.reduce((a,b)=>a+b[k],0)/results.length).toFixed(2);
+
+  let h = `
+    <div class="kgrid">
+      <div class="kcard"><div class="kl">Top priority</div><div class="kv" style="font-size:14px;line-height:1.4">${results[0].name}</div><div class="ks">Rank #1 opportunity</div></div>
+      <div class="kcard"><div class="kl">Opportunities</div><div class="kv">${results.length}</div><div class="ks">Total scored</div></div>
+      <div class="kcard"><div class="kl">Avg benefit</div><div class="kv">${avg('benefit')}</div><div class="ks">Out of 5.0</div></div>
+      <div class="kcard"><div class="kl">Avg friction</div><div class="kv">${avg('friction')}</div><div class="ks">Out of 5.0</div></div>
     </div>
-    <div class="card" style="overflow-x:auto">
-    <table class="results-table">
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Opportunity</th>
-          <th style="color:var(--green)">Benefit score<br><span style="font-weight:400;color:var(--text-faint);font-size:10px">EBITDA / value</span></th>
-          <th style="color:var(--red)">Friction score<br><span style="font-weight:400;color:var(--text-faint);font-size:10px">Execution difficulty</span></th>
-          <th style="color:var(--blue)">Priority score<br><span style="font-weight:400;color:var(--text-faint);font-size:10px">Overall attractiveness</span></th>
-          <th>Priority index<br><span style="font-weight:400;color:var(--text-faint);font-size:10px">Bang for buck</span></th>
-          <th>Criteria dots<br><span style="font-weight:400;color:var(--text-faint);font-size:10px">Impact·Crit·Val$·Diff·Time·Risk·Dep</span></th>
-        </tr>
-      </thead>
-      <tbody>`;
+    <div class="card" style="overflow-x:auto;padding:0">
+    <table class="rt">
+      <thead><tr>
+        <th>Rank</th><th>Opportunity</th>
+        <th style="color:#3B6D11">Benefit score<br><span style="font-weight:400;color:#9A9890;font-size:10px">EBITDA / value delivered</span></th>
+        <th style="color:#993C1D">Friction score<br><span style="font-weight:400;color:#9A9890;font-size:10px">Execution difficulty</span></th>
+        <th style="color:#185FA5">Priority score<br><span style="font-weight:400;color:#9A9890;font-size:10px">Overall attractiveness</span></th>
+        <th>Priority index<br><span style="font-weight:400;color:#9A9890;font-size:10px">Bang for buck</span></th>
+        <th>Criteria dots<br><span style="font-weight:400;color:#9A9890;font-size:10px">Imp · Crit · Val$ · Diff · Time · Risk · Dep</span></th>
+      </tr></thead><tbody>`;
 
-  res.forEach(r => {
-    const bc = scoreColor(r.benefit, false);
-    const fc = scoreColor(r.friction, true);
-    const pc = scoreColor(r.priority/5, false);
-    const rClass = r.rank <= 3 ? 'rank-'+r.rank : '';
-    const dots = r.s.map((v,i) => {
-      const c = i<3 ? dotColors.b[v-1] : dotColors.f[v-1];
-      return `<span class="dot" style="background:${c}" title="Score ${v}"></span>`;
-    }).join('');
-    html += `<tr>
-      <td><span class="rank-chip ${rClass}">${r.rank}</span></td>
-      <td style="font-weight:500;min-width:150px;white-space:normal">${r.name}</td>
-      <td><span class="badge" style="background:${bc.bg};color:${bc.col}">${r.benefit.toFixed(2)}</span></td>
-      <td><span class="badge" style="background:${fc.bg};color:${fc.col}">${r.friction.toFixed(2)}</span></td>
-      <td><span class="badge" style="background:${pc.bg};color:${pc.col}">${r.priority.toFixed(2)}</span></td>
-      <td style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500">${r.index.toFixed(2)}×</td>
+  results.forEach(r => {
+    const b = bc(r.benefit,false), f = bc(r.friction,true), p = bc(r.priority/5,false);
+    const rc = r.rank<=3?'rchip r'+r.rank:'rchip';
+    const dots = r.s.map((v,i)=>`<span class="dot" style="background:${i<3?dotB[v-1]:dotF[v-1]}" title="${v}"></span>`).join('');
+    h += `<tr>
+      <td><span class="${rc}">${r.rank}</span></td>
+      <td style="font-weight:500;min-width:135px;white-space:normal">${r.name}</td>
+      <td><span class="badge" style="background:${b.bg};color:${b.col}">${r.benefit.toFixed(2)}</span></td>
+      <td><span class="badge" style="background:${f.bg};color:${f.col}">${r.friction.toFixed(2)}</span></td>
+      <td><span class="badge" style="background:${p.bg};color:${p.col}">${r.priority.toFixed(2)}</span></td>
+      <td style="font-family:'DM Mono',monospace;font-weight:500">${r.index.toFixed(2)}×</td>
       <td>${dots}</td>
     </tr>`;
   });
-
-  html += `</tbody></table>
-    <div class="legend">
+  h += `</tbody></table></div>
+    <div class="legend-note">
       <strong>Benefit score</strong> = weighted avg of Impact, Criticality, Value$ &nbsp;|&nbsp;
       <strong>Friction score</strong> = weighted avg of Difficulty, Time, Risk, Dependencies &nbsp;|&nbsp;
       <strong>Priority score</strong> = Benefit × (6 − Friction) &nbsp;|&nbsp;
       <strong>Priority index</strong> = Benefit ÷ Friction &nbsp;|&nbsp;
       Green dots = benefit criteria &nbsp;|&nbsp; Red dots = friction criteria
-    </div>
     </div>`;
 
-  document.getElementById('results-area').innerHTML = html;
-  switchTab('results');
+  document.getElementById('res-area').innerHTML = h;
 }
 
+/* ── INIT ── */
 renderScoring();
+calc();
 </script>
 </body>
 </html>
