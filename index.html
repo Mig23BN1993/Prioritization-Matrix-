@@ -1,240 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Operational Opportunity Matrix — Midstream O&G</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
-
-  :root {
-    --bg: #F5F3EE;
-    --surface: #FFFFFF;
-    --surface2: #F0EDE6;
-    --border: rgba(0,0,0,0.10);
-    --border-strong: rgba(0,0,0,0.18);
-    --text: #1A1A18;
-    --text-muted: #6B6860;
-    --text-faint: #9A9890;
-    --green: #3B6D11; --green-bg: #EAF3DE; --green-mid: #639922;
-    --red: #993C1D;   --red-bg: #FAECE7;   --red-mid: #D85A30;
-    --blue: #185FA5;  --blue-bg: #E6F1FB;  --blue-mid: #378ADD;
-    --amber: #854F0B; --amber-bg: #FAEEDA;
-    --accent: #2A5C8F;
-    --radius: 10px; --radius-lg: 14px;
-    --shadow: 0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
-    --grid-col: rgba(0,0,0,0.07);
-    --axis-col: #6B6860;
-    --mid-line: rgba(0,0,0,0.15);
-    --quad-label: rgba(0,0,0,0.18);
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#F5F3EE;--surface:#fff;--surface2:#F0EDE6;
+  --border:rgba(0,0,0,.10);--border-strong:rgba(0,0,0,.18);
+  --text:#1A1A18;--text-muted:#6B6860;--text-faint:#9A9890;
+  --green:#3B6D11;--green-bg:#EAF3DE;--green-mid:#639922;
+  --red:#993C1D;--red-bg:#FAECE7;--red-mid:#D85A30;
+  --blue:#185FA5;--blue-bg:#E6F1FB;--blue-mid:#378ADD;
+  --amber:#854F0B;--amber-bg:#FAEEDA;
+  --purple:#534AB7;--purple-bg:#EEEDFE;--purple-mid:#7F77DD;
+  --accent:#2A5C8F;
+  --radius:10px;--radius-lg:14px;
+  --shadow:0 1px 4px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.05);
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181A;--surface:#232325;--surface2:#2C2C2E;
+    --border:rgba(255,255,255,.10);--border-strong:rgba(255,255,255,.20);
+    --text:#F0EDE6;--text-muted:#9A9890;--text-faint:#6B6860;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #18181A; --surface: #232325; --surface2: #2C2C2E;
-      --border: rgba(255,255,255,0.10); --border-strong: rgba(255,255,255,0.20);
-      --text: #F0EDE6; --text-muted: #9A9890; --text-faint: #6B6860;
-      --grid-col: rgba(255,255,255,0.07);
-      --axis-col: #9A9890;
-      --mid-line: rgba(255,255,255,0.18);
-      --quad-label: rgba(255,255,255,0.22);
-    }
-  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh}
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+.hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:15px 32px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;box-shadow:0 1px 8px rgba(0,0,0,.06)}
+.hdr-icon{width:36px;height:36px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,#2A5C8F,#1a3d5c);display:flex;align-items:center;justify-content:center}
+.hdr-icon svg{width:18px;height:18px;fill:#fff}
+.hdr-title h1{font-size:15px;font-weight:600}
+.hdr-title p{font-size:12px;color:var(--text-muted)}
+.hdr-badge{margin-left:auto;font-size:11px;font-weight:500;background:var(--blue-bg);color:var(--blue);padding:3px 10px;border-radius:99px;font-family:'DM Mono',monospace}
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg); color: var(--text);
-    font-size: 14px; line-height: 1.6; min-height: 100vh;
-  }
+.wrap{max-width:1100px;margin:0 auto;padding:28px 24px 64px}
 
-  /* ── HEADER ── */
-  .hdr {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 15px 32px; display: flex; align-items: center; gap: 14px;
-    position: sticky; top: 0; z-index: 100;
-    box-shadow: 0 1px 8px rgba(0,0,0,0.06);
-  }
-  .hdr-icon {
-    width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
-    background: linear-gradient(135deg,#2A5C8F,#1a3d5c);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .hdr-icon svg { width: 18px; height: 18px; fill: #fff; }
-  .hdr-title h1 { font-size: 15px; font-weight: 600; }
-  .hdr-title p  { font-size: 12px; color: var(--text-muted); }
-  .hdr-badge {
-    margin-left: auto; font-size: 11px; font-weight: 500;
-    background: var(--blue-bg); color: var(--blue);
-    padding: 3px 10px; border-radius: 99px;
-    font-family: 'DM Mono', monospace;
-  }
+.tabs{display:flex;gap:2px;flex-wrap:wrap;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:4px;margin-bottom:22px;width:fit-content}
+.tab{font-size:13px;font-weight:500;padding:7px 17px;border-radius:8px;cursor:pointer;color:var(--text-muted);transition:all .14s;white-space:nowrap}
+.tab.on{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.tab:hover:not(.on){color:var(--text)}
+.pnl{display:none}.pnl.on{display:block}
 
-  /* ── LAYOUT ── */
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 24px 64px; }
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:16px;box-shadow:var(--shadow)}
+.slabel{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+.slabel.g{color:var(--green)}.slabel.r{color:var(--red)}
+.info{background:var(--blue-bg);border-left:3px solid var(--blue-mid);border-radius:0 var(--radius) var(--radius) 0;padding:11px 15px;font-size:13px;color:var(--blue);margin-bottom:16px;line-height:1.6}
+.formula{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:13px 17px;font-size:13px;color:var(--text-muted);line-height:2;font-family:'DM Mono',monospace;margin-bottom:18px}
+.formula b{color:var(--text);font-weight:500;font-family:'DM Sans',sans-serif}
 
-  /* ── TABS ── */
-  .tabs {
-    display: flex; gap: 2px; flex-wrap: wrap;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--radius-lg); padding: 4px;
-    margin-bottom: 22px; width: fit-content;
-  }
-  .tab {
-    font-size: 13px; font-weight: 500; padding: 7px 17px;
-    border-radius: 8px; cursor: pointer; color: var(--text-muted);
-    transition: all .14s; white-space: nowrap;
-  }
-  .tab.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-  .tab:hover:not(.on) { color: var(--text); }
-  .pnl { display: none; }
-  .pnl.on { display: block; }
+details.crit{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:7px;overflow:hidden}
+details.crit summary{font-size:13px;font-weight:500;padding:10px 15px;cursor:pointer;background:var(--surface);list-style:none;display:flex;align-items:center;gap:8px;user-select:none}
+details.crit summary::-webkit-details-marker{display:none}
+details.crit summary::before{content:'›';font-size:15px;color:var(--text-muted);transition:transform .13s;display:inline-block;width:13px;text-align:center}
+details.crit[open] summary::before{transform:rotate(90deg)}
+details.crit[open] summary{background:var(--surface2)}
+.cbody{padding:0 15px 13px;background:var(--surface)}
+table.dt{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:9px}
+table.dt th{font-weight:500;color:var(--text-muted);padding:5px 9px;background:var(--surface2);border:1px solid var(--border);text-align:left}
+table.dt td{padding:5px 9px;border:1px solid var(--border);color:var(--text);vertical-align:top}
+table.dt tr:nth-child(even) td{background:var(--surface2)}
 
-  /* ── CARD ── */
-  .card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-lg); padding: 20px 24px;
-    margin-bottom: 16px; box-shadow: var(--shadow);
-  }
+.wgrid{display:flex;flex-direction:column;gap:8px}
+.wrow{display:flex;align-items:center;gap:12px}
+.wrow label{font-size:13px;min-width:185px;color:var(--text)}
+.wrow input[type=number]{width:62px;padding:5px 7px;border:1px solid var(--border-strong);border-radius:6px;font-size:13px;font-family:'DM Mono',monospace;background:var(--surface);color:var(--text);text-align:center}
+.wrow input:focus{outline:2px solid var(--blue-mid)}
+.wsum{font-size:12px;font-family:'DM Mono',monospace;margin-top:6px;margin-bottom:18px;color:var(--text-muted)}
+.wsum span{font-weight:600}
 
-  /* ── SECTION LABEL ── */
-  .slabel {
-    font-size: 11px; font-weight: 600; letter-spacing: .08em;
-    text-transform: uppercase; margin-bottom: 12px;
-  }
-  .slabel.g { color: var(--green); }
-  .slabel.r { color: var(--red); }
-  .slabel.b { color: var(--blue); }
+.add-row{display:flex;gap:8px;align-items:center;margin-bottom:13px;flex-wrap:wrap}
+.add-row input[type=text]{font-size:13px;padding:6px 11px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text);width:255px}
+.btn{font-size:12.5px;font-weight:500;padding:7px 15px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text);cursor:pointer;transition:all .12s}
+.btn:hover{background:var(--surface2)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);padding:8px 22px;font-size:13px}
+.btn.primary:hover{background:#1e4a74}
+.btn.danger{color:var(--red);border-color:transparent}
+.btn.danger:hover{background:var(--red-bg)}
+.sov{overflow-x:auto}
+table.st{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
+table.st th{font-size:11px;font-weight:500;padding:7px 9px;border-bottom:2px solid var(--border);text-align:center;color:var(--text-muted)}
+table.st th.left{text-align:left}table.st th.g{color:var(--green)}table.st th.r{color:var(--red)}
+table.st td{padding:7px 9px;border-bottom:1px solid var(--border);vertical-align:middle;text-align:center}
+table.st td.left{text-align:left;font-weight:500;min-width:145px;white-space:normal}
+table.st tbody tr:hover td{background:var(--surface2)}
+select.ss{font-size:12px;padding:3px 5px;border:1px solid var(--border-strong);border-radius:6px;background:var(--surface);color:var(--text);width:48px;cursor:pointer;font-family:'DM Mono',monospace}
 
-  /* ── INFO / FORMULA BOX ── */
-  .info {
-    background: var(--blue-bg); border-left: 3px solid var(--blue-mid);
-    border-radius: 0 var(--radius) var(--radius) 0;
-    padding: 11px 15px; font-size: 13px; color: var(--blue);
-    margin-bottom: 16px; line-height: 1.6;
-  }
-  .formula {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 13px 17px;
-    font-size: 13px; color: var(--text-muted); line-height: 2;
-    font-family: 'DM Mono', monospace; margin-bottom: 18px;
-  }
-  .formula b { color: var(--text); font-weight: 500; font-family: 'DM Sans', sans-serif; }
+/* ── SORT TOGGLES ── */
+.sort-strip{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.sort-strip .strip-label{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);margin-right:2px;white-space:nowrap}
+.sort-btn{font-size:12px;font-weight:500;padding:6px 14px;border-radius:99px;cursor:pointer;transition:all .15s;border:1.5px solid transparent;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.sort-btn .sbi{font-size:10px;opacity:.7}
+.sort-btn.ps {background:#E6F1FB;color:#0C447C;border-color:#B5D4F4}
+.sort-btn.ps.on {background:#185FA5;color:#fff;border-color:#185FA5}
+.sort-btn.pi {background:#EEEDFE;color:#3C3489;border-color:#AFA9EC}
+.sort-btn.pi.on {background:#534AB7;color:#fff;border-color:#534AB7}
+.sort-btn.bs {background:#EAF3DE;color:#27500A;border-color:#C0DD97}
+.sort-btn.bs.on {background:#3B6D11;color:#fff;border-color:#3B6D11}
+.sort-btn.fs {background:#FAECE7;color:#712B13;border-color:#F5C4B3}
+.sort-btn.fs.on {background:#993C1D;color:#fff;border-color:#993C1D}
 
-  /* ── ACCORDION ── */
-  details.crit { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 7px; overflow: hidden; }
-  details.crit summary {
-    font-size: 13px; font-weight: 500; padding: 10px 15px;
-    cursor: pointer; background: var(--surface); list-style: none;
-    display: flex; align-items: center; gap: 8px; user-select: none;
-  }
-  details.crit summary::-webkit-details-marker { display: none; }
-  details.crit summary::before {
-    content: '›'; font-size: 15px; color: var(--text-muted);
-    transition: transform .13s; display: inline-block; width: 13px; text-align: center;
-  }
-  details.crit[open] summary::before { transform: rotate(90deg); }
-  details.crit[open] summary { background: var(--surface2); }
-  .cbody { padding: 0 15px 13px; background: var(--surface); }
+/* ── CONTROLS ── */
+.ctrl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:13px}
+.ctrl label{font-size:12.5px;color:var(--text-muted);font-weight:500}
+.ctrl select{font-size:12.5px;padding:6px 10px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text);cursor:pointer}
 
-  /* ── DEF TABLE ── */
-  table.dt { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 9px; }
-  table.dt th { font-weight: 500; color: var(--text-muted); padding: 5px 9px; background: var(--surface2); border: 1px solid var(--border); text-align: left; }
-  table.dt td { padding: 5px 9px; border: 1px solid var(--border); color: var(--text); vertical-align: top; }
-  table.dt tr:nth-child(even) td { background: var(--surface2); }
+/* ── KPI CARDS ── */
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.kcard{background:var(--surface2);border-radius:var(--radius);padding:12px 15px}
+.kcard .kl{font-size:11px;color:var(--text-muted);margin-bottom:3px}
+.kcard .kv{font-size:21px;font-weight:600;line-height:1.2}
+.kcard .ks{font-size:11px;color:var(--text-faint);margin-top:2px}
 
-  /* ── WEIGHT INPUTS ── */
-  .wgrid { display: flex; flex-direction: column; gap: 8px; }
-  .wrow  { display: flex; align-items: center; gap: 12px; }
-  .wrow label { font-size: 13px; min-width: 185px; color: var(--text); }
-  .wrow input[type=number] {
-    width: 62px; padding: 5px 7px; border: 1px solid var(--border-strong);
-    border-radius: 6px; font-size: 13px; font-family: 'DM Mono', monospace;
-    background: var(--surface); color: var(--text); text-align: center;
-  }
-  .wrow input:focus { outline: 2px solid var(--blue-mid); }
-  .wsum { font-size: 12px; font-family: 'DM Mono', monospace; margin-top: 6px; margin-bottom: 18px; color: var(--text-muted); }
-  .wsum span { font-weight: 600; }
+.leg-row{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--text-muted);align-items:center;margin-top:12px}
+.swatch{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:4px;vertical-align:middle}
 
-  /* ── SCORE TABLE ── */
-  .add-row { display: flex; gap: 8px; align-items: center; margin-bottom: 13px; flex-wrap: wrap; }
-  .add-row input[type=text] {
-    font-size: 13px; padding: 6px 11px;
-    border: 1px solid var(--border-strong); border-radius: 8px;
-    background: var(--surface); color: var(--text); width: 255px;
-  }
-  .btn { font-size: 12.5px; font-weight: 500; padding: 7px 15px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); color: var(--text); cursor: pointer; transition: all .12s; }
-  .btn:hover { background: var(--surface2); }
-  .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); padding: 8px 22px; font-size: 13px; }
-  .btn.primary:hover { background: #1e4a74; }
-  .btn.danger { color: var(--red); border-color: transparent; }
-  .btn.danger:hover { background: var(--red-bg); }
+/* ── QUADRANT CARDS ── */
+.ql-section{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);margin:18px 0 8px}
+.ql-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ql-card{border-radius:var(--radius);padding:12px 15px;cursor:pointer;transition:all .16s;border:2px solid transparent;user-select:none}
+.ql-card:hover{filter:brightness(.97)}
+.ql-card.avoid    {background:#FAECE7;border-color:#F5C4B3}
+.ql-card.strategic{background:#FAEEDA;border-color:#FAC775}
+.ql-card.fillin   {background:#E6F1FB;border-color:#B5D4F4}
+.ql-card.quickwin {background:#EAF3DE;border-color:#C0DD97}
+.ql-card.off{background:var(--surface2)!important;border-color:var(--border)!important;opacity:.5}
+.ql-card.off .ql-title,.ql-card.off .ql-desc{color:var(--text-muted)!important}
+.ql-card.off .tpill{background:var(--text-faint)!important}
+.ql-title{font-weight:500;font-size:13px;display:flex;align-items:center;gap:7px;margin-bottom:3px}
+.ql-desc{font-size:12px}
+.ql-card.avoid     .ql-title{color:#712B13} .ql-card.avoid     .ql-desc{color:#993C1D}
+.ql-card.strategic .ql-title{color:#633806} .ql-card.strategic .ql-desc{color:#854F0B}
+.ql-card.fillin    .ql-title{color:#0C447C} .ql-card.fillin    .ql-desc{color:#185FA5}
+.ql-card.quickwin  .ql-title{color:#27500A} .ql-card.quickwin  .ql-desc{color:#3B6D11}
+.tpill{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:99px;color:#fff;flex-shrink:0}
+.tdot{width:5px;height:5px;border-radius:50%;background:#fff;display:inline-block}
+.ql-card.avoid     .tpill{background:#993C1D}
+.ql-card.strategic .tpill{background:#854F0B}
+.ql-card.fillin    .tpill{background:#185FA5}
+.ql-card.quickwin  .tpill{background:#3B6D11}
 
-  .soverflow { overflow-x: auto; }
-  table.st { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
-  table.st th { font-size: 11px; font-weight: 500; padding: 7px 9px; border-bottom: 2px solid var(--border); text-align: center; color: var(--text-muted); }
-  table.st th.left { text-align: left; }
-  table.st th.g { color: var(--green); }
-  table.st th.r { color: var(--red); }
-  table.st td { padding: 7px 9px; border-bottom: 1px solid var(--border); vertical-align: middle; text-align: center; }
-  table.st td.left { text-align: left; font-weight: 500; min-width: 145px; white-space: normal; }
-  table.st tbody tr:hover td { background: var(--surface2); }
-  select.ss { font-size: 12px; padding: 3px 5px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface); color: var(--text); width: 48px; cursor: pointer; font-family: 'DM Mono', monospace; }
+/* ── RESULTS TABLE ── */
+.badge{display:inline-block;font-size:12px;font-weight:500;padding:2px 9px;border-radius:99px;font-family:'DM Mono',monospace}
+.rchip{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-size:12px;font-weight:600;background:var(--surface2);color:var(--text-muted)}
+.rchip.r1{background:#FAEEDA;color:#854F0B}.rchip.r2{background:#D3D1C7;color:#444441}.rchip.r3{background:#FAECE7;color:#993C1D}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:2px}
+table.rt{width:100%;border-collapse:collapse;font-size:13px}
+table.rt th{font-size:11px;font-weight:500;padding:8px 11px;border-bottom:2px solid var(--border);text-align:left;color:var(--text-muted);white-space:nowrap}
+table.rt td{padding:8px 11px;border-bottom:1px solid var(--border);vertical-align:middle}
+table.rt tbody tr:hover td{background:var(--surface2)}
+.leg-note{margin-top:14px;font-size:11.5px;color:var(--text-faint);line-height:1.9}
 
-  /* ── DASHBOARD ── */
-  .ctrl { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
-  .ctrl label { font-size: 12.5px; color: var(--text-muted); font-weight: 500; }
-  .ctrl select { font-size: 12.5px; padding: 6px 10px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); color: var(--text); cursor: pointer; }
-
-  .kgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(0,1fr)); gap: 10px; margin-bottom: 16px; }
-  .kcard { background: var(--surface2); border-radius: var(--radius); padding: 12px 15px; }
-  .kcard .kl { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
-  .kcard .kv { font-size: 21px; font-weight: 600; line-height: 1.2; }
-  .kcard .ks { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
-
-  .leg-row { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--text-muted); align-items: center; margin-top: 12px; }
-  .swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 4px; vertical-align: middle; }
-
-  .qlgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
-  .qlcard { background: var(--surface2); border-radius: var(--radius); padding: 10px 14px; }
-  .qlcard .qt { font-weight: 500; color: var(--text); font-size: 13px; margin-bottom: 3px; }
-  .qlcard .qd { color: var(--text-muted); font-size: 12px; }
-
-  /* ── RESULTS ── */
-  .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 2px 9px; border-radius: 99px; font-family: 'DM Mono', monospace; }
-  .rchip { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; font-size: 12px; font-weight: 600; background: var(--surface2); color: var(--text-muted); }
-  .rchip.r1 { background: #FAEEDA; color: #854F0B; }
-  .rchip.r2 { background: #D3D1C7; color: #444441; }
-  .rchip.r3 { background: #FAECE7; color: #993C1D; }
-  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 2px; }
-
-  table.rt { width: 100%; border-collapse: collapse; font-size: 13px; }
-  table.rt th { font-size: 11px; font-weight: 500; padding: 8px 11px; border-bottom: 2px solid var(--border); text-align: left; color: var(--text-muted); white-space: nowrap; }
-  table.rt td { padding: 8px 11px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-  table.rt tbody tr:hover td { background: var(--surface2); }
-  .legend-note { margin-top: 14px; font-size: 11.5px; color: var(--text-faint); line-height: 1.9; }
-
-  @media (max-width: 640px) {
-    .wrap { padding: 16px 12px 48px; }
-    .hdr  { padding: 13px 16px; }
-    .tab  { padding: 6px 11px; font-size: 12px; }
-    .kgrid  { grid-template-columns: 1fr 1fr; }
-    .qlgrid { grid-template-columns: 1fr; }
-  }
+@media(max-width:640px){
+  .wrap{padding:16px 12px 48px}.hdr{padding:13px 16px}
+  .tab{padding:6px 11px;font-size:12px}
+  .kgrid{grid-template-columns:1fr 1fr}.ql-grid{grid-template-columns:1fr}
+  .sort-strip{gap:5px}
+}
 </style>
 </head>
 <body>
 
 <header class="hdr">
-  <div class="hdr-icon">
-    <svg viewBox="0 0 20 20"><path d="M3 4h14v2H3zm0 4h10v2H3zm0 4h12v2H3z"/></svg>
-  </div>
+  <div class="hdr-icon"><svg viewBox="0 0 20 20"><path d="M3 4h14v2H3zm0 4h10v2H3zm0 4h12v2H3z"/></svg></div>
   <div class="hdr-title">
     <h1>Operational Opportunity Matrix</h1>
     <p>Midstream Oil &amp; Gas — Prioritization Framework</p>
   </div>
-  <div class="hdr-badge">v2.0</div>
+  <div class="hdr-badge">v2.3</div>
 </header>
 
 <div class="wrap">
@@ -246,130 +182,107 @@
     <div class="tab"     onclick="sw('res')">Results &amp; Ranking</div>
   </div>
 
-  <!-- ═══ DEFINITIONS ═══ -->
+  <!-- DEFINITIONS -->
   <div class="pnl on" id="pnl-def">
     <div class="card">
       <div class="info">Seven criteria → two composite scores. <strong>Benefit</strong> = operational value. <strong>Friction</strong> = execution difficulty. All scored 1–5.</div>
       <div class="slabel g">Benefit criteria — what the opportunity delivers</div>
-
-      <details class="crit" open>
-        <summary>Impact</summary>
-        <div class="cbody"><table class="dt">
-          <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
-          <tr><td>1</td><td>Negligible operational effect</td><td>Minor admin workflow tweak</td></tr>
-          <tr><td>2</td><td>Limited improvement, narrow scope</td><td>Single terminal throughput +1%</td></tr>
-          <tr><td>3</td><td>Moderate gain, one asset class</td><td>Pipeline compression efficiency +5%</td></tr>
-          <tr><td>4</td><td>Significant gain, multi-asset or network</td><td>NGL recovery improvement across a system</td></tr>
-          <tr><td>5</td><td>Transformational, enterprise-wide</td><td>SCADA optimization — unplanned shutdowns &gt;20% reduction</td></tr>
-        </table></div>
-      </details>
-      <details class="crit">
-        <summary>Criticality</summary>
-        <div class="cbody"><table class="dt">
-          <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
-          <tr><td>1</td><td>Nice-to-have, no compliance/safety link</td><td>Reporting dashboard beautification</td></tr>
-          <tr><td>2</td><td>Operationally useful but deferrable</td><td>Predictive scheduling for truck dispatch</td></tr>
-          <tr><td>3</td><td>Important for reliability or regulatory posture</td><td>Leak detection model on gathering line</td></tr>
-          <tr><td>4</td><td>High criticality — financial/regulatory consequence</td><td>Cathodic protection monitoring</td></tr>
-          <tr><td>5</td><td>Safety/compliance mandatory — deferral = liability</td><td>PHMSA-mandated integrity management program</td></tr>
-        </table></div>
-      </details>
-      <details class="crit">
-        <summary>Value potential ($)</summary>
-        <div class="cbody"><table class="dt">
-          <tr><th>Score</th><th>Annual EBITDA contribution</th><th>Midstream example</th></tr>
-          <tr><td>1</td><td>&lt; $250K</td><td>Route optimization for one fleet</td></tr>
-          <tr><td>2</td><td>$250K – $1M</td><td>Fuel gas optimization on a compressor station</td></tr>
-          <tr><td>3</td><td>$1M – $5M</td><td>Throughput uplift on gathering system</td></tr>
-          <tr><td>4</td><td>$5M – $20M</td><td>Fractionator yield improvement</td></tr>
-          <tr><td>5</td><td>&gt; $20M</td><td>Pipeline capacity release or tariff optimization</td></tr>
-        </table></div>
-      </details>
-
+      <details class="crit" open><summary>Impact</summary><div class="cbody"><table class="dt">
+        <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
+        <tr><td>1</td><td>Negligible operational effect</td><td>Minor admin workflow tweak</td></tr>
+        <tr><td>2</td><td>Limited improvement, narrow scope</td><td>Single terminal throughput +1%</td></tr>
+        <tr><td>3</td><td>Moderate gain, one asset class</td><td>Pipeline compression efficiency +5%</td></tr>
+        <tr><td>4</td><td>Significant gain, multi-asset or network</td><td>NGL recovery improvement across a system</td></tr>
+        <tr><td>5</td><td>Transformational, enterprise-wide</td><td>SCADA optimization — shutdowns reduced &gt;20%</td></tr>
+      </table></div></details>
+      <details class="crit"><summary>Criticality</summary><div class="cbody"><table class="dt">
+        <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
+        <tr><td>1</td><td>Nice-to-have, no compliance/safety link</td><td>Reporting dashboard beautification</td></tr>
+        <tr><td>2</td><td>Operationally useful but deferrable</td><td>Predictive scheduling for truck dispatch</td></tr>
+        <tr><td>3</td><td>Important for reliability or regulatory posture</td><td>Leak detection model on gathering line</td></tr>
+        <tr><td>4</td><td>High criticality — financial/regulatory consequence</td><td>Cathodic protection monitoring</td></tr>
+        <tr><td>5</td><td>Safety/compliance mandatory — deferral = liability</td><td>PHMSA-mandated integrity management program</td></tr>
+      </table></div></details>
+      <details class="crit"><summary>Value potential ($)</summary><div class="cbody"><table class="dt">
+        <tr><th>Score</th><th>Annual EBITDA contribution</th><th>Midstream example</th></tr>
+        <tr><td>1</td><td>&lt; $250K</td><td>Route optimization for one fleet</td></tr>
+        <tr><td>2</td><td>$250K–$1M</td><td>Fuel gas optimization on compressor station</td></tr>
+        <tr><td>3</td><td>$1M–$5M</td><td>Throughput uplift on gathering system</td></tr>
+        <tr><td>4</td><td>$5M–$20M</td><td>Fractionator yield improvement</td></tr>
+        <tr><td>5</td><td>&gt; $20M</td><td>Pipeline capacity release or tariff optimization</td></tr>
+      </table></div></details>
       <div class="slabel r" style="margin-top:20px">Friction criteria — what it costs to execute</div>
-      <details class="crit">
-        <summary>Level of difficulty / ease of implementation</summary>
-        <div class="cbody"><table class="dt">
-          <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
-          <tr><td>1</td><td>Very easy — off-the-shelf, no integration</td><td>Commercial SaaS ERP module</td></tr>
-          <tr><td>2</td><td>Low complexity — minor config, existing data</td><td>Dashboard on existing historian</td></tr>
-          <tr><td>3</td><td>Moderate — some integration, vendor support</td><td>Predictive maintenance with new sensors</td></tr>
-          <tr><td>4</td><td>High — custom build or major IT change</td><td>ML model requiring new data pipeline</td></tr>
-          <tr><td>5</td><td>Very high — multi-system overhaul or greenfield</td><td>Enterprise SCADA replacement</td></tr>
-        </table></div>
-      </details>
-      <details class="crit">
-        <summary>Time to value</summary>
-        <div class="cbody"><table class="dt">
-          <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
-          <tr><td>1</td><td>&lt; 1 month</td><td>Quick-config reporting change</td></tr>
-          <tr><td>2</td><td>1–3 months</td><td>Pilot on one compressor station</td></tr>
-          <tr><td>3</td><td>3–6 months</td><td>New measurement and analytics layer</td></tr>
-          <tr><td>4</td><td>6–12 months</td><td>Full network optimization rollout</td></tr>
-          <tr><td>5</td><td>&gt; 12 months</td><td>Multi-phase infrastructure program</td></tr>
-        </table></div>
-      </details>
-      <details class="crit">
-        <summary>Risk / complexity</summary>
-        <div class="cbody"><table class="dt">
-          <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
-          <tr><td>1</td><td>Proven solution, near-zero execution risk</td><td>Vendor-certified metering upgrade</td></tr>
-          <tr><td>2</td><td>Low risk — minor unknowns, good analogues</td><td>Scheduling algorithm with case studies</td></tr>
-          <tr><td>3</td><td>Moderate risk — some technology uncertainty</td><td>First-of-kind digital twin for a segment</td></tr>
-          <tr><td>4</td><td>High risk — novel approach, limited precedent</td><td>AI autonomous control on live pipeline</td></tr>
-          <tr><td>5</td><td>Very high — reg + tech + change-mgmt risk</td><td>Cross-company data sharing platform</td></tr>
-        </table></div>
-      </details>
-      <details class="crit">
-        <summary>Dependencies</summary>
-        <div class="cbody"><table class="dt">
-          <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
-          <tr><td>1</td><td>Standalone — no external dependencies</td><td>Internal ops report</td></tr>
-          <tr><td>2</td><td>Minor — 1–2 internal approvals</td><td>Data access request to IT</td></tr>
-          <tr><td>3</td><td>Moderate — cross-functional or minor vendor</td><td>Engineering + ops + IT alignment needed</td></tr>
-          <tr><td>4</td><td>High — external partners, regulatory, contractual</td><td>Shipper agreement or FERC filing needed</td></tr>
-          <tr><td>5</td><td>Very high — JV / third-party infra / multi-regulator</td><td>Interconnect needing 3 counterparty approvals</td></tr>
-        </table></div>
-      </details>
+      <details class="crit"><summary>Level of difficulty / ease of implementation</summary><div class="cbody"><table class="dt">
+        <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
+        <tr><td>1</td><td>Very easy — off-the-shelf, no integration</td><td>Commercial SaaS ERP module</td></tr>
+        <tr><td>2</td><td>Low complexity — minor config, existing data</td><td>Dashboard on existing historian</td></tr>
+        <tr><td>3</td><td>Moderate — some integration, vendor support</td><td>Predictive maintenance with new sensors</td></tr>
+        <tr><td>4</td><td>High — custom build or major IT change</td><td>ML model requiring new data pipeline</td></tr>
+        <tr><td>5</td><td>Very high — multi-system overhaul or greenfield</td><td>Enterprise SCADA replacement</td></tr>
+      </table></div></details>
+      <details class="crit"><summary>Time to value</summary><div class="cbody"><table class="dt">
+        <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
+        <tr><td>1</td><td>&lt; 1 month</td><td>Quick-config reporting change</td></tr>
+        <tr><td>2</td><td>1–3 months</td><td>Pilot on one compressor station</td></tr>
+        <tr><td>3</td><td>3–6 months</td><td>New measurement and analytics layer</td></tr>
+        <tr><td>4</td><td>6–12 months</td><td>Full network optimization rollout</td></tr>
+        <tr><td>5</td><td>&gt; 12 months</td><td>Multi-phase infrastructure program</td></tr>
+      </table></div></details>
+      <details class="crit"><summary>Risk / complexity</summary><div class="cbody"><table class="dt">
+        <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
+        <tr><td>1</td><td>Proven solution, near-zero execution risk</td><td>Vendor-certified metering upgrade</td></tr>
+        <tr><td>2</td><td>Low risk — minor unknowns, good analogues</td><td>Scheduling algorithm with case studies</td></tr>
+        <tr><td>3</td><td>Moderate risk — some technology uncertainty</td><td>First-of-kind digital twin for a segment</td></tr>
+        <tr><td>4</td><td>High risk — novel approach, limited precedent</td><td>AI autonomous control on live pipeline</td></tr>
+        <tr><td>5</td><td>Very high — reg + tech + change-mgmt risk</td><td>Cross-company data sharing platform</td></tr>
+      </table></div></details>
+      <details class="crit"><summary>Dependencies</summary><div class="cbody"><table class="dt">
+        <tr><th>Score</th><th>Definition</th><th>Midstream example</th></tr>
+        <tr><td>1</td><td>Standalone — no external dependencies</td><td>Internal ops report</td></tr>
+        <tr><td>2</td><td>Minor — 1–2 internal approvals</td><td>Data access request to IT</td></tr>
+        <tr><td>3</td><td>Moderate — cross-functional or minor vendor</td><td>Engineering + ops + IT alignment needed</td></tr>
+        <tr><td>4</td><td>High — external partners, regulatory, contractual</td><td>Shipper agreement or FERC filing needed</td></tr>
+        <tr><td>5</td><td>Very high — JV / third-party infra / multi-regulator</td><td>Interconnect needing 3 counterparty approvals</td></tr>
+      </table></div></details>
     </div>
   </div>
 
-  <!-- ═══ WEIGHTS ═══ -->
+  <!-- WEIGHTS -->
   <div class="pnl" id="pnl-wt">
     <div class="card">
       <div class="formula">
-        <b>Benefit score</b>   = weighted avg of Impact, Criticality, Value ($)<br>
-        <b>Friction score</b>  = weighted avg of Difficulty, Time to value, Risk, Dependencies<br>
-        <b>Priority score</b>  = Benefit × (6 − Friction) — rewards high benefit + low friction<br>
-        <b>Priority index</b>  = Benefit ÷ Friction — pure bang-for-buck ratio<br>
-        <b>Priority rank</b>   = ranked descending by Priority score
+        <b>Benefit score</b>  = weighted avg of Impact, Criticality, Value ($)<br>
+        <b>Friction score</b> = weighted avg of Difficulty, Time to value, Risk, Dependencies<br>
+        <b>Priority score</b> = Benefit × (6 − Friction) — rewards high benefit + low friction<br>
+        <b>Priority index</b> = Benefit ÷ Friction — pure bang-for-buck ratio<br>
+        <b>Priority rank</b>  = determined by active sort toggle
       </div>
       <div class="slabel g">Benefit weights (must sum to 100%)</div>
       <div class="wgrid">
-        <div class="wrow"><label>Impact</label>          <input type="number" id="wi"   min="0" max="100" value="35"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
-        <div class="wrow"><label>Criticality</label>     <input type="number" id="wc"   min="0" max="100" value="30"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
-        <div class="wrow"><label>Value potential ($)</label><input type="number" id="wv" min="0" max="100" value="35"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+        <div class="wrow"><label>Impact</label>           <input type="number" id="wi"   min="0" max="100" value="35"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+        <div class="wrow"><label>Criticality</label>      <input type="number" id="wc"   min="0" max="100" value="30"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+        <div class="wrow"><label>Value potential ($)</label><input type="number" id="wv"  min="0" max="100" value="35"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
       </div>
       <div class="wsum">Sum: <span id="bsum">100%</span></div>
       <div class="slabel r">Friction weights (must sum to 100%)</div>
       <div class="wgrid">
-        <div class="wrow"><label>Difficulty</label>      <input type="number" id="wd"   min="0" max="100" value="25"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
-        <div class="wrow"><label>Time to value</label>   <input type="number" id="wt"   min="0" max="100" value="25"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
-        <div class="wrow"><label>Risk / complexity</label><input type="number" id="wr"  min="0" max="100" value="30"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
-        <div class="wrow"><label>Dependencies</label>    <input type="number" id="wdep" min="0" max="100" value="20"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+        <div class="wrow"><label>Difficulty</label>       <input type="number" id="wd"   min="0" max="100" value="25"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+        <div class="wrow"><label>Time to value</label>    <input type="number" id="wt"   min="0" max="100" value="25"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+        <div class="wrow"><label>Risk / complexity</label><input type="number" id="wr"   min="0" max="100" value="30"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
+        <div class="wrow"><label>Dependencies</label>     <input type="number" id="wdep" min="0" max="100" value="20"><span style="font-size:12px;color:var(--text-faint)">%</span></div>
       </div>
       <div class="wsum">Sum: <span id="fsum">100%</span></div>
     </div>
   </div>
 
-  <!-- ═══ SCORING ═══ -->
+  <!-- SCORING -->
   <div class="pnl" id="pnl-sc">
     <div class="card">
       <div class="add-row">
-        <input type="text" id="nname" placeholder="Opportunity name..." />
+        <input type="text" id="nname" placeholder="Opportunity name..."/>
         <button class="btn" onclick="addOpp()">+ Add opportunity</button>
       </div>
-      <div class="soverflow">
+      <div class="sov">
         <table class="st">
           <thead><tr>
             <th class="left" style="min-width:150px">Opportunity</th>
@@ -386,9 +299,20 @@
     </div>
   </div>
 
-  <!-- ═══ DASHBOARD ═══ -->
+  <!-- DASHBOARD -->
   <div class="pnl" id="pnl-dash">
     <div class="card">
+
+      <!-- SORT TOGGLES -->
+      <div class="sort-strip">
+        <span class="strip-label">Sort &amp; rank by</span>
+        <button class="sort-btn ps on" id="sb-priority" onclick="setSort('priority')"><span class="sbi">↓</span>Priority score</button>
+        <button class="sort-btn pi"    id="sb-index"    onclick="setSort('index')"><span class="sbi">↓</span>Priority index</button>
+        <button class="sort-btn bs"    id="sb-benefit"  onclick="setSort('benefit')"><span class="sbi">↓</span>Benefit score</button>
+        <button class="sort-btn fs"    id="sb-friction" onclick="setSort('friction')"><span class="sbi">↑</span>Friction score</button>
+      </div>
+
+      <!-- CHART CONTROLS -->
       <div class="ctrl">
         <label>Bubble size =</label>
         <select id="bsel" onchange="renderDash()">
@@ -409,19 +333,43 @@
           <option value="friction">Friction zone</option>
         </select>
       </div>
+
       <div class="kgrid" id="dash-kpis"></div>
-      <div style="position:relative;width:100%;height:440px">
-        <canvas id="bubbleChart"></canvas>
-      </div>
+      <div style="position:relative;width:100%;height:440px"><canvas id="bubbleChart"></canvas></div>
       <div class="leg-row" id="bubble-leg"></div>
-      <div class="qlgrid" id="qlabels"></div>
+
+      <!--
+        QUADRANT MAP (X = Benefit →,  Y = Friction ↑)
+        TL: hi friction / lo benefit → Avoid   TR: hi friction / hi benefit → Strategic bets
+        BL: lo friction / lo benefit → Fill-ins BR: lo friction / hi benefit → Quick wins
+      -->
+      <div class="ql-section">Click to show / hide quadrants</div>
+      <div class="ql-grid">
+        <div class="ql-card avoid"     id="ql-tl" onclick="toggleQ('tl')">
+          <div class="ql-title"><span class="tpill"><span class="tdot"></span>ON</span>Top-left — High friction / Low benefit</div>
+          <div class="ql-desc">Avoid or defer — high execution cost, low return</div>
+        </div>
+        <div class="ql-card strategic" id="ql-tr" onclick="toggleQ('tr')">
+          <div class="ql-title"><span class="tpill"><span class="tdot"></span>ON</span>Top-right — High friction / High benefit</div>
+          <div class="ql-desc">Strategic bets — plan carefully, sequence well</div>
+        </div>
+        <div class="ql-card fillin"    id="ql-bl" onclick="toggleQ('bl')">
+          <div class="ql-title"><span class="tpill"><span class="tdot"></span>ON</span>Bottom-left — Low friction / Low benefit</div>
+          <div class="ql-desc">Fill-ins — do only if bandwidth allows</div>
+        </div>
+        <div class="ql-card quickwin"  id="ql-br" onclick="toggleQ('br')">
+          <div class="ql-title"><span class="tpill"><span class="tdot"></span>ON</span>Bottom-right — Low friction / High benefit</div>
+          <div class="ql-desc">Quick wins — prioritize immediately</div>
+        </div>
+      </div>
+
       <p id="dash-empty" style="display:none;font-size:13px;color:var(--text-muted);padding:16px 0">
         Score opportunities first, then click "Calculate &amp; rank" in the Score tab.
       </p>
     </div>
   </div>
 
-  <!-- ═══ RESULTS ═══ -->
+  <!-- RESULTS -->
   <div class="pnl" id="pnl-res">
     <div id="res-area">
       <div class="card" style="color:var(--text-muted);font-size:13px">Score opportunities and click "Calculate &amp; rank" in the Score tab first.</div>
@@ -430,284 +378,292 @@
 </div>
 
 <script>
-/* ── DATA ── */
-let opps = [
+let opps=[
   {name:"Real-time pipeline optimization",     s:[5,4,5,4,4,4,3]},
   {name:"NGL fractionation yield uplift",       s:[4,3,5,3,3,3,2]},
   {name:"Compressor station fuel optimization", s:[3,2,3,2,2,2,1]},
   {name:"Leak detection ML model rollout",      s:[4,5,4,4,3,4,3]},
   {name:"Throughput scheduling automation",     s:[3,3,3,2,2,2,2]},
 ];
-let results = [];
-let bubbleInst = null;
+let results=[];
+let bubbleInst=null;
+let sortKey='priority';
+const qState={tl:true,tr:true,bl:true,br:true};
+const PALETTE=['#185FA5','#3B6D11','#993C1D','#854F0B','#0F6E56','#534AB7','#D4537E','#639922','#D85A30','#1D9E75'];
 
-const PALETTE = ['#185FA5','#3B6D11','#993C1D','#854F0B','#0F6E56','#534AB7','#D4537E','#639922','#D85A30','#1D9E75'];
+const sortCfg={
+  priority:{key:'priority',desc:true, label:'Priority score'},
+  index:   {key:'index',   desc:true, label:'Priority index'},
+  benefit: {key:'benefit', desc:true, label:'Benefit score'},
+  friction:{key:'friction',desc:false,label:'Friction score (lowest first)'},
+};
+const sortColors={priority:'#185FA5',index:'#534AB7',benefit:'#3B6D11',friction:'#993C1D'};
 
-/* ── TAB SWITCH ── */
-function sw(t) {
-  document.querySelectorAll('.tab').forEach(e => e.classList.remove('on'));
-  document.querySelectorAll('.pnl').forEach(e => e.classList.remove('on'));
+function setSort(k){
+  sortKey=k;
+  ['priority','index','benefit','friction'].forEach(id=>{
+    const btn=document.getElementById('sb-'+id);
+    if(btn) btn.classList.toggle('on',id===k);
+  });
+  if(results.length){applySort();renderResults();renderDash();}
+}
+
+function applySort(){
+  const cfg=sortCfg[sortKey];
+  results.sort((a,b)=>cfg.desc?b[cfg.key]-a[cfg.key]:a[cfg.key]-b[cfg.key]);
+  results.forEach((r,i)=>r.rank=i+1);
+}
+
+function qKey(r){
+  const hiB=r.benefit>=3,hiF=r.friction>=3;
+  if(!hiB&&hiF)  return'tl';
+  if(hiB&&hiF)   return'tr';
+  if(!hiB&&!hiF) return'bl';
+  return'br';
+}
+
+function toggleQ(k){
+  qState[k]=!qState[k];
+  const card=document.getElementById('ql-'+k);
+  card.classList.toggle('off',!qState[k]);
+  const pill=card.querySelector('.tpill');
+  pill.innerHTML=`<span class="tdot"></span>${qState[k]?'ON':'OFF'}`;
+  if(results.length)renderDash();
+}
+
+function sw(t){
+  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('on'));
+  document.querySelectorAll('.pnl').forEach(e=>e.classList.remove('on'));
   document.querySelector('[onclick="sw(\''+t+'\')"]').classList.add('on');
   document.getElementById('pnl-'+t).classList.add('on');
-  if (t === 'sc')   renderScoring();
-  if (t === 'dash') renderDash();
+  if(t==='sc')   renderScoring();
+  if(t==='dash') renderDash();
+  if(t==='res')  renderResults();
 }
 
-/* ── WEIGHTS ── */
-function getW() {
-  return {
-    bw: [+wi.value, +wc.value, +wv.value],
-    fw: [+wd.value, +wt.value, +wr.value, +wdep.value]
+function getW(){
+  return{
+    bw:[+wi.value,+wc.value,+wv.value],
+    fw:[+wd.value,+wt.value,+wr.value,+wdep.value]
   };
 }
-function updateSums() {
-  const {bw,fw} = getW();
-  const bs = bw.reduce((a,b)=>a+b,0), fs = fw.reduce((a,b)=>a+b,0);
-  bsum.textContent = bs+'%'; bsum.style.color = bs===100?'#3B6D11':'#993C1D';
-  fsum.textContent = fs+'%'; fsum.style.color = fs===100?'#3B6D11':'#993C1D';
+function updateSums(){
+  const{bw,fw}=getW();
+  const bsv=bw.reduce((a,b)=>a+b,0),fsv=fw.reduce((a,b)=>a+b,0);
+  bsum.textContent=bsv+'%';bsum.style.color=bsv===100?'#3B6D11':'#993C1D';
+  fsum.textContent=fsv+'%';fsum.style.color=fsv===100?'#3B6D11':'#993C1D';
 }
-document.querySelectorAll('input[type=number]').forEach(i => i.addEventListener('input', updateSums));
+document.querySelectorAll('input[type=number]').forEach(i=>i.addEventListener('input',updateSums));
 updateSums();
 
-/* ── SCORING ── */
-function mkSel(i, fi) {
-  let o = '';
-  for (let v=1;v<=5;v++) o += `<option value="${v}"${opps[i].s[fi]===v?' selected':''}>${v}</option>`;
-  return `<select class="ss" onchange="opps[${i}].s[${fi}]=+this.value">${o}</select>`;
+function mkSel(i,fi){
+  let o='';for(let v=1;v<=5;v++) o+=`<option value="${v}"${opps[i].s[fi]===v?' selected':''}>${v}</option>`;
+  return`<select class="ss" onchange="opps[${i}].s[${fi}]=+this.value">${o}</select>`;
 }
-function renderScoring() {
-  sbody.innerHTML = opps.map((o,i) => `
-    <tr>
-      <td class="left">${o.name}</td>
-      ${[0,1,2,3,4,5,6].map(fi=>`<td>${mkSel(i,fi)}</td>`).join('')}
-      <td><button class="btn danger" onclick="opps.splice(${i},1);renderScoring()">✕</button></td>
-    </tr>`).join('');
+function renderScoring(){
+  sbody.innerHTML=opps.map((o,i)=>`
+    <tr><td class="left">${o.name}</td>
+    ${[0,1,2,3,4,5,6].map(fi=>`<td>${mkSel(i,fi)}</td>`).join('')}
+    <td><button class="btn danger" onclick="opps.splice(${i},1);renderScoring()">✕</button></td></tr>`).join('');
 }
-function addOpp() {
-  const inp = document.getElementById('nname');
-  const name = inp.value.trim() || 'New opportunity '+(opps.length+1);
-  opps.push({name, s:[3,3,3,3,3,3,3]});
-  inp.value = '';
-  renderScoring();
+function addOpp(){
+  const inp=document.getElementById('nname');
+  const name=inp.value.trim()||'New opportunity '+(opps.length+1);
+  opps.push({name,s:[3,3,3,3,3,3,3]});inp.value='';renderScoring();
 }
 
-/* ── CALCULATE ── */
-function calc() {
-  const {bw,fw} = getW();
-  if (bw.reduce((a,b)=>a+b,0)!==100 || fw.reduce((a,b)=>a+b,0)!==100) {
-    alert('Weights must each sum to 100%. Please adjust in the Weights tab.'); return;
+function calc(){
+  const{bw,fw}=getW();
+  if(bw.reduce((a,b)=>a+b,0)!==100||fw.reduce((a,b)=>a+b,0)!==100){
+    alert('Weights must each sum to 100%. Please adjust in the Weights tab.');return;
   }
-  results = opps.map(o => {
-    const s = o.s;
-    const benefit  = (s[0]*bw[0]+s[1]*bw[1]+s[2]*bw[2])/100;
-    const friction = (s[3]*fw[0]+s[4]*fw[1]+s[5]*fw[2]+s[6]*fw[3])/100;
-    return {name:o.name, s, benefit, friction, priority:benefit*(6-friction), index:benefit/friction};
+  results=opps.map(o=>{
+    const s=o.s;
+    const benefit =(s[0]*bw[0]+s[1]*bw[1]+s[2]*bw[2])/100;
+    const friction=(s[3]*fw[0]+s[4]*fw[1]+s[5]*fw[2]+s[6]*fw[3])/100;
+    return{name:o.name,s,benefit,friction,priority:benefit*(6-friction),index:benefit/friction};
   });
-  results.sort((a,b) => b.priority-a.priority);
-  results.forEach((r,i) => r.rank = i+1);
-  renderResults();
-  renderDash();
-  sw('dash');
+  applySort();
+  renderResults();renderDash();sw('dash');
 }
 
-/* ── BADGE COLOR ── */
-function bc(v, inv) {
-  if (!inv) {
-    if (v>=4.2) return {bg:'#EAF3DE',col:'#3B6D11'};
-    if (v>=3.2) return {bg:'#E6F1FB',col:'#185FA5'};
-    if (v>=2.2) return {bg:'#FAEEDA',col:'#854F0B'};
-    return {bg:'#FAECE7',col:'#993C1D'};
-  } else {
-    if (v>=4.2) return {bg:'#FAECE7',col:'#993C1D'};
-    if (v>=3.2) return {bg:'#FAEEDA',col:'#854F0B'};
-    if (v>=2.2) return {bg:'#E6F1FB',col:'#185FA5'};
-    return {bg:'#EAF3DE',col:'#3B6D11'};
-  }
+function bc(v,inv){
+  if(!inv){if(v>=4.2)return{bg:'#EAF3DE',col:'#3B6D11'};if(v>=3.2)return{bg:'#E6F1FB',col:'#185FA5'};if(v>=2.2)return{bg:'#FAEEDA',col:'#854F0B'};return{bg:'#FAECE7',col:'#993C1D'};}
+  else{if(v>=4.2)return{bg:'#FAECE7',col:'#993C1D'};if(v>=3.2)return{bg:'#FAEEDA',col:'#854F0B'};if(v>=2.2)return{bg:'#E6F1FB',col:'#185FA5'};return{bg:'#EAF3DE',col:'#3B6D11'};}
 }
 
-/* ── DASHBOARD ── */
-function getSV(r, key) {
-  const m = {priority:r.priority,index:r.index*2,impact:r.s[0],criticality:r.s[1],value:r.s[2],difficulty:r.s[3],time:r.s[4],risk:r.s[5],dependencies:r.s[6]};
-  return m[key] ?? r.priority;
+function getSV(r,key){
+  const m={priority:r.priority,index:r.index*2,impact:r.s[0],criticality:r.s[1],value:r.s[2],difficulty:r.s[3],time:r.s[4],risk:r.s[5],dependencies:r.s[6]};
+  return m[key]??r.priority;
 }
 
-function renderDash() {
-  const empty = !results.length;
-  document.getElementById('dash-empty').style.display = empty ? 'block' : 'none';
-  if (empty) {
-    document.getElementById('dash-kpis').innerHTML = '';
-    document.getElementById('bubble-leg').innerHTML = '';
-    document.getElementById('qlabels').innerHTML = '';
-    if (bubbleInst) { bubbleInst.destroy(); bubbleInst = null; }
-    return;
+function renderDash(){
+  const empty=!results.length;
+  document.getElementById('dash-empty').style.display=empty?'block':'none';
+  if(empty){
+    document.getElementById('dash-kpis').innerHTML='';
+    document.getElementById('bubble-leg').innerHTML='';
+    if(bubbleInst){bubbleInst.destroy();bubbleInst=null;}return;
   }
 
-  const sKey = bsel.value;
-  const cKey = csel.value;
-  const avg  = k => (results.reduce((a,b)=>a+b[k],0)/results.length).toFixed(2);
-  const top  = results[0];
+  const sKey=bsel.value,cKey=csel.value;
+  const avg=k=>(results.reduce((a,b)=>a+b[k],0)/results.length).toFixed(2);
+  const top=results[0];
+  const cfg=sortCfg[sortKey];
 
-  document.getElementById('dash-kpis').innerHTML = `
-    <div class="kcard"><div class="kl">Top priority</div><div class="kv" style="font-size:14px;line-height:1.4">${top.name}</div><div class="ks">Rank #1 opportunity</div></div>
+  document.getElementById('dash-kpis').innerHTML=`
+    <div class="kcard"><div class="kl">Top priority</div><div class="kv" style="font-size:14px;line-height:1.4">${top.name}</div><div class="ks">Sorted by ${cfg.label}</div></div>
     <div class="kcard"><div class="kl">Opportunities</div><div class="kv">${results.length}</div><div class="ks">Total scored</div></div>
     <div class="kcard"><div class="kl">Avg benefit</div><div class="kv">${avg('benefit')}</div><div class="ks">Out of 5.0</div></div>
-    <div class="kcard"><div class="kl">Avg friction</div><div class="kv">${avg('friction')}</div><div class="ks">Out of 5.0</div></div>
-  `;
+    <div class="kcard"><div class="kl">Avg friction</div><div class="kv">${avg('friction')}</div><div class="ks">Out of 5.0</div></div>`;
 
-  const sVals = results.map(r => getSV(r, sKey));
-  const minS  = Math.min(...sVals), maxS = Math.max(...sVals);
-  const scaleR = v => minS===maxS ? 20 : 12+((v-minS)/(maxS-minS))*30;
+  const allSV=results.map(r=>getSV(r,sKey));
+  const minS=Math.min(...allSV),maxS=Math.max(...allSV);
+  const scaleR=v=>minS===maxS?20:12+((v-minS)/(maxS-minS))*30;
 
-  const pt = r => ({
-    x: +r.benefit.toFixed(2), y: +r.friction.toFixed(2),
-    r: scaleR(getSV(r, sKey)),
-    name: r.name, rank: r.rank,
-    priority: r.priority.toFixed(2), index: r.index.toFixed(2)
-  });
+  const pt=r=>({x:+r.benefit.toFixed(2),y:+r.friction.toFixed(2),r:scaleR(getSV(r,sKey)),name:r.name,rank:r.rank,priority:r.priority.toFixed(2),index:r.index.toFixed(2)});
 
-  let datasets, legHTML;
-  if (cKey === 'rank') {
-    datasets = results.map((r,i) => ({
-      label: r.name,
-      data: [pt(r)],
-      backgroundColor: PALETTE[i%PALETTE.length]+'CC',
-      borderColor:     PALETTE[i%PALETTE.length], borderWidth:1.5
+  let datasets,legHTML;
+  if(cKey==='rank'){
+    datasets=results.filter(r=>qState[qKey(r)]).map(r=>({
+      label:r.name,data:[pt(r)],
+      backgroundColor:PALETTE[(r.rank-1)%PALETTE.length]+'CC',
+      borderColor:PALETTE[(r.rank-1)%PALETTE.length],borderWidth:1.5
     }));
-    legHTML = results.map((r,i) =>
-      `<span style="display:flex;align-items:center;gap:5px"><span class="swatch" style="background:${PALETTE[i%PALETTE.length]}"></span>#${r.rank} ${r.name}</span>`).join('');
-  } else if (cKey === 'benefit') {
-    const z = [
-      {l:'High benefit (≥ 3.5)', c:'#3B6D11', f:r=>r.benefit>=3.5},
-      {l:'Mid benefit (2.5–3.5)', c:'#854F0B', f:r=>r.benefit>=2.5&&r.benefit<3.5},
-      {l:'Low benefit (< 2.5)',   c:'#993C1D', f:r=>r.benefit<2.5}
-    ];
-    datasets = z.map(z=>({label:z.l,data:results.filter(z.f).map(pt),backgroundColor:z.c+'CC',borderColor:z.c,borderWidth:1.5})).filter(d=>d.data.length);
-    legHTML  = z.map(z=>`<span style="display:flex;align-items:center;gap:5px"><span class="swatch" style="background:${z.c}"></span>${z.l}</span>`).join('');
-  } else {
-    const z = [
-      {l:'Low friction (< 2.5)',   c:'#3B6D11', f:r=>r.friction<2.5},
-      {l:'Mid friction (2.5–3.5)', c:'#854F0B', f:r=>r.friction>=2.5&&r.friction<3.5},
-      {l:'High friction (≥ 3.5)',  c:'#993C1D', f:r=>r.friction>=3.5}
-    ];
-    datasets = z.map(z=>({label:z.l,data:results.filter(z.f).map(pt),backgroundColor:z.c+'CC',borderColor:z.c,borderWidth:1.5})).filter(d=>d.data.length);
-    legHTML  = z.map(z=>`<span style="display:flex;align-items:center;gap:5px"><span class="swatch" style="background:${z.c}"></span>${z.l}</span>`).join('');
+    legHTML=results.map(r=>`<span style="display:flex;align-items:center;gap:4px;opacity:${qState[qKey(r)]?1:0.3}"><span class="swatch" style="background:${PALETTE[(r.rank-1)%PALETTE.length]}"></span>#${r.rank} ${r.name}</span>`).join('');
+  }else if(cKey==='benefit'){
+    const z=[{l:'High benefit (≥ 3.5)',c:'#3B6D11',f:r=>r.benefit>=3.5},{l:'Mid benefit (2.5–3.5)',c:'#854F0B',f:r=>r.benefit>=2.5&&r.benefit<3.5},{l:'Low benefit (< 2.5)',c:'#993C1D',f:r=>r.benefit<2.5}];
+    datasets=z.map(z=>({label:z.l,data:results.filter(r=>z.f(r)&&qState[qKey(r)]).map(pt),backgroundColor:z.c+'CC',borderColor:z.c,borderWidth:1.5})).filter(d=>d.data.length);
+    legHTML=z.map(z=>`<span style="display:flex;align-items:center;gap:4px"><span class="swatch" style="background:${z.c}"></span>${z.l}</span>`).join('');
+  }else{
+    const z=[{l:'Low friction (< 2.5)',c:'#3B6D11',f:r=>r.friction<2.5},{l:'Mid friction (2.5–3.5)',c:'#854F0B',f:r=>r.friction>=2.5&&r.friction<3.5},{l:'High friction (≥ 3.5)',c:'#993C1D',f:r=>r.friction>=3.5}];
+    datasets=z.map(z=>({label:z.l,data:results.filter(r=>z.f(r)&&qState[qKey(r)]).map(pt),backgroundColor:z.c+'CC',borderColor:z.c,borderWidth:1.5})).filter(d=>d.data.length);
+    legHTML=z.map(z=>`<span style="display:flex;align-items:center;gap:4px"><span class="swatch" style="background:${z.c}"></span>${z.l}</span>`).join('');
   }
+  document.getElementById('bubble-leg').innerHTML=legHTML;
 
-  document.getElementById('bubble-leg').innerHTML = legHTML;
-  document.getElementById('qlabels').innerHTML = `
-    <div class="qlcard"><div class="qt">High benefit / Low friction</div><div class="qd">Quick wins — prioritize immediately</div></div>
-    <div class="qlcard"><div class="qt">High benefit / High friction</div><div class="qd">Strategic bets — plan carefully</div></div>
-    <div class="qlcard"><div class="qt">Low benefit / Low friction</div><div class="qd">Fill-ins — do if bandwidth allows</div></div>
-    <div class="qlcard"><div class="qt">Low benefit / High friction</div><div class="qd">Avoid or defer</div></div>
-  `;
+  const isDark=matchMedia('(prefers-color-scheme: dark)').matches;
+  const gridCol=isDark?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.07)';
+  const textCol=isDark?'#9A9890':'#6B6860';
+  const lineCol=isDark?'rgba(255,255,255,0.20)':'rgba(0,0,0,0.15)';
+  const lblCol =isDark?'rgba(255,255,255,0.28)':'rgba(0,0,0,0.22)';
+  const qFill={
+    tl:{on:'rgba(153,60,29,0.04)',off:'rgba(180,178,169,0.10)'},
+    tr:{on:'rgba(133,79,11,0.05)',off:'rgba(180,178,169,0.10)'},
+    bl:{on:'rgba(24,95,165,0.04)',off:'rgba(180,178,169,0.10)'},
+    br:{on:'rgba(59,109,17,0.05)',off:'rgba(180,178,169,0.10)'},
+  };
+  const sLabel={priority:'Priority score',index:'Priority index ×2',impact:'Impact',criticality:'Criticality',value:'Value potential ($)',difficulty:'Difficulty',time:'Time to value',risk:'Risk',dependencies:'Dependencies'}[sKey];
 
-  const isDark  = matchMedia('(prefers-color-scheme: dark)').matches;
-  const gridCol = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
-  const textCol = isDark ? '#9A9890' : '#6B6860';
-  const lineCol = isDark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.15)';
-  const lblCol  = isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.18)';
-
-  const sLabel = {priority:'Priority score',index:'Priority index ×2',impact:'Impact',criticality:'Criticality',value:'Value potential ($)',difficulty:'Difficulty',time:'Time to value',risk:'Risk',dependencies:'Dependencies'}[sKey];
-
-  if (bubbleInst) { bubbleInst.destroy(); bubbleInst = null; }
-
-  bubbleInst = new Chart(document.getElementById('bubbleChart'), {
-    type: 'bubble',
-    data: {datasets},
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      layout: {padding:{top:26,right:26,bottom:8,left:8}},
-      plugins: {
-        legend: {display:false},
-        tooltip: {
-          callbacks: {
-            title: () => '',
-            label(ctx) {
-              const d   = ctx.raw;
-              const nm  = cKey==='rank' ? ctx.dataset.label : (d.name||ctx.dataset.label);
-              return [`${nm}`,`Benefit: ${d.x}   Friction: ${d.y}`,`Priority: ${d.priority}   Index: ${d.index}×`,`Rank: #${d.rank}`,`Bubble size = ${sLabel}`];
-            }
+  if(bubbleInst){bubbleInst.destroy();bubbleInst=null;}
+  bubbleInst=new Chart(document.getElementById('bubbleChart'),{
+    type:'bubble',data:{datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      layout:{padding:{top:26,right:26,bottom:8,left:8}},
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{
+          title:()=>'',
+          label(ctx){
+            const d=ctx.raw;
+            const nm=cKey==='rank'?ctx.dataset.label:(d.name||ctx.dataset.label);
+            return[nm,`Benefit: ${d.x}   Friction: ${d.y}`,`Priority: ${d.priority}   Index: ${d.index}×`,`Rank #${d.rank} by ${cfg.label}`,`Bubble size = ${sLabel}`];
           }
-        }
+        }}
       },
-      scales: {
-        x: {min:0.5,max:5.5,title:{display:true,text:'Benefit score  →',color:textCol,font:{size:12}},ticks:{color:textCol,stepSize:1},grid:{color:gridCol},border:{display:false}},
-        y: {min:0.5,max:5.5,title:{display:true,text:'Friction score  ↑',color:textCol,font:{size:12}},ticks:{color:textCol,stepSize:1},grid:{color:gridCol},border:{display:false}}
+      scales:{
+        x:{min:0.5,max:5.5,title:{display:true,text:'Benefit score  →',color:textCol,font:{size:12}},ticks:{color:textCol,stepSize:1},grid:{color:gridCol},border:{display:false}},
+        y:{min:0.5,max:5.5,title:{display:true,text:'Friction score  ↑  (higher = harder)',color:textCol,font:{size:12}},ticks:{color:textCol,stepSize:1},grid:{color:gridCol},border:{display:false}}
       }
     },
-    plugins: [{
-      id: 'quadLines',
-      afterDraw(chart) {
-        const {ctx, scales:{x,y}, chartArea:{left,right,top,bottom}} = chart;
-        const mx = x.getPixelForValue(3), my = y.getPixelForValue(3);
+    plugins:[{
+      id:'qd',
+      beforeDraw(chart){
+        const{ctx,scales:{x,y},chartArea:{left,right,top,bottom}}=chart;
+        const mx=x.getPixelForValue(3),my=y.getPixelForValue(3);
         ctx.save();
-        ctx.setLineDash([5,5]); ctx.strokeStyle = lineCol; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(mx,top);  ctx.lineTo(mx,bottom); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(left,my); ctx.lineTo(right,my);  ctx.stroke();
+        [{key:'tl',x1:left,y1:top,x2:mx,y2:my},{key:'tr',x1:mx,y1:top,x2:right,y2:my},{key:'bl',x1:left,y1:my,x2:mx,y2:bottom},{key:'br',x1:mx,y1:my,x2:right,y2:bottom}]
+          .forEach(q=>{ctx.fillStyle=qFill[q.key][qState[q.key]?'on':'off'];ctx.fillRect(q.x1,q.y1,q.x2-q.x1,q.y2-q.y1);});
+        ctx.restore();
+      },
+      afterDraw(chart){
+        const{ctx,scales:{x,y},chartArea:{left,right,top,bottom}}=chart;
+        const mx=x.getPixelForValue(3),my=y.getPixelForValue(3);
+        ctx.save();
+        ctx.setLineDash([5,5]);ctx.strokeStyle=lineCol;ctx.lineWidth=1;
+        ctx.beginPath();ctx.moveTo(mx,top);ctx.lineTo(mx,bottom);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(left,my);ctx.lineTo(right,my);ctx.stroke();
         ctx.setLineDash([]);
-        ctx.font = '11px DM Sans,sans-serif'; ctx.fillStyle = lblCol;
-        ctx.fillText('Quick wins',     left+8, top+16);
-        ctx.fillText('Strategic bets', mx+8,   top+16);
-        ctx.fillText('Fill-ins',       left+8, my+16);
-        ctx.fillText('Avoid / defer',  mx+8,   my+16);
+        ctx.font='11px DM Sans,sans-serif';
+        [{key:'tl',tx:left+8,ty:top+16,lbl:'Avoid / defer'},{key:'tr',tx:mx+8,ty:top+16,lbl:'Strategic bets'},{key:'bl',tx:left+8,ty:my+16,lbl:'Fill-ins'},{key:'br',tx:mx+8,ty:my+16,lbl:'Quick wins'}]
+          .forEach(q=>{ctx.fillStyle=qState[q.key]?lblCol:(isDark?'rgba(255,255,255,0.10)':'rgba(0,0,0,0.10)');ctx.fillText(q.lbl,q.tx,q.ty);});
         ctx.restore();
       }
     }]
   });
 }
 
-/* ── RESULTS ── */
-function renderResults() {
-  if (!results.length) return;
-  const dotB = ['#C0DD97','#97C459','#639922','#3B6D11','#27500A'];
-  const dotF = ['#F7C1C1','#F09595','#E24B4A','#A32D2D','#791F1F'];
-  const avg  = k => (results.reduce((a,b)=>a+b[k],0)/results.length).toFixed(2);
+function renderResults(){
+  if(!results.length)return;
+  const dotB=['#C0DD97','#97C459','#639922','#3B6D11','#27500A'];
+  const dotF=['#F7C1C1','#F09595','#E24B4A','#A32D2D','#791F1F'];
+  const avg=k=>(results.reduce((a,b)=>a+b[k],0)/results.length).toFixed(2);
+  const cfg=sortCfg[sortKey];
+  const scol=sortColors[sortKey];
 
-  let h = `
-    <div class="kgrid">
-      <div class="kcard"><div class="kl">Top priority</div><div class="kv" style="font-size:14px;line-height:1.4">${results[0].name}</div><div class="ks">Rank #1 opportunity</div></div>
-      <div class="kcard"><div class="kl">Opportunities</div><div class="kv">${results.length}</div><div class="ks">Total scored</div></div>
-      <div class="kcard"><div class="kl">Avg benefit</div><div class="kv">${avg('benefit')}</div><div class="ks">Out of 5.0</div></div>
-      <div class="kcard"><div class="kl">Avg friction</div><div class="kv">${avg('friction')}</div><div class="ks">Out of 5.0</div></div>
-    </div>
-    <div class="card" style="overflow-x:auto;padding:0">
-    <table class="rt">
-      <thead><tr>
-        <th>Rank</th><th>Opportunity</th>
-        <th style="color:#3B6D11">Benefit score<br><span style="font-weight:400;color:#9A9890;font-size:10px">EBITDA / value delivered</span></th>
-        <th style="color:#993C1D">Friction score<br><span style="font-weight:400;color:#9A9890;font-size:10px">Execution difficulty</span></th>
-        <th style="color:#185FA5">Priority score<br><span style="font-weight:400;color:#9A9890;font-size:10px">Overall attractiveness</span></th>
-        <th>Priority index<br><span style="font-weight:400;color:#9A9890;font-size:10px">Bang for buck</span></th>
-        <th>Criteria dots<br><span style="font-weight:400;color:#9A9890;font-size:10px">Imp · Crit · Val$ · Diff · Time · Risk · Dep</span></th>
-      </tr></thead><tbody>`;
+  const sortStrip=`<div class="sort-strip" style="margin-bottom:12px">
+    <span class="strip-label">Sort &amp; rank by</span>
+    <button class="sort-btn ps${sortKey==='priority'?' on':''}" id="rbs-priority" onclick="setSort('priority')"><span class="sbi">↓</span>Priority score</button>
+    <button class="sort-btn pi${sortKey==='index'?' on':''}"    id="rbs-index"    onclick="setSort('index')"><span class="sbi">↓</span>Priority index</button>
+    <button class="sort-btn bs${sortKey==='benefit'?' on':''}"  id="rbs-benefit"  onclick="setSort('benefit')"><span class="sbi">↓</span>Benefit score</button>
+    <button class="sort-btn fs${sortKey==='friction'?' on':''}" id="rbs-friction" onclick="setSort('friction')"><span class="sbi">↑</span>Friction score</button>
+  </div>`;
 
-  results.forEach(r => {
-    const b = bc(r.benefit,false), f = bc(r.friction,true), p = bc(r.priority/5,false);
-    const rc = r.rank<=3?'rchip r'+r.rank:'rchip';
-    const dots = r.s.map((v,i)=>`<span class="dot" style="background:${i<3?dotB[v-1]:dotF[v-1]}" title="${v}"></span>`).join('');
-    h += `<tr>
+  let h=sortStrip+`
+  <div class="kgrid">
+    <div class="kcard"><div class="kl">Top priority</div><div class="kv" style="font-size:14px;line-height:1.4">${results[0].name}</div><div class="ks">by ${cfg.label}</div></div>
+    <div class="kcard"><div class="kl">Opportunities</div><div class="kv">${results.length}</div><div class="ks">Total scored</div></div>
+    <div class="kcard"><div class="kl">Avg benefit</div><div class="kv">${avg('benefit')}</div><div class="ks">Out of 5.0</div></div>
+    <div class="kcard"><div class="kl">Avg friction</div><div class="kv">${avg('friction')}</div><div class="ks">Out of 5.0</div></div>
+  </div>
+  <div class="card" style="overflow-x:auto;padding:0">
+  <table class="rt">
+    <thead><tr>
+      <th>Rank</th><th>Opportunity</th>
+      <th style="color:${sortKey==='benefit'?scol:'inherit'}">Benefit score${sortKey==='benefit'?' ↓':''}<br><span style="font-weight:400;color:var(--text-faint);font-size:10px">EBITDA / value</span></th>
+      <th style="color:${sortKey==='friction'?scol:'inherit'}">Friction score${sortKey==='friction'?' ↑':''}<br><span style="font-weight:400;color:var(--text-faint);font-size:10px">Exec difficulty</span></th>
+      <th style="color:${sortKey==='priority'?scol:'inherit'}">Priority score${sortKey==='priority'?' ↓':''}<br><span style="font-weight:400;color:var(--text-faint);font-size:10px">Overall attractiveness</span></th>
+      <th style="color:${sortKey==='index'?scol:'inherit'}">Priority index${sortKey==='index'?' ↓':''}<br><span style="font-weight:400;color:var(--text-faint);font-size:10px">Bang for buck</span></th>
+      <th>Criteria dots<br><span style="font-weight:400;color:var(--text-faint);font-size:10px">Imp · Crit · Val$ · Diff · Time · Risk · Dep</span></th>
+    </tr></thead><tbody>`;
+
+  results.forEach(r=>{
+    const b=bc(r.benefit,false),f=bc(r.friction,true),p=bc(r.priority/5,false),ix=bc(r.index/2,false);
+    const rc=r.rank<=3?'rchip r'+r.rank:'rchip';
+    const dots=r.s.map((v,i)=>`<span class="dot" style="background:${i<3?dotB[v-1]:dotF[v-1]}" title="${v}"></span>`).join('');
+    const hl=`border:1.5px solid ${scol}`;
+    h+=`<tr>
       <td><span class="${rc}">${r.rank}</span></td>
       <td style="font-weight:500;min-width:135px;white-space:normal">${r.name}</td>
-      <td><span class="badge" style="background:${b.bg};color:${b.col}">${r.benefit.toFixed(2)}</span></td>
-      <td><span class="badge" style="background:${f.bg};color:${f.col}">${r.friction.toFixed(2)}</span></td>
-      <td><span class="badge" style="background:${p.bg};color:${p.col}">${r.priority.toFixed(2)}</span></td>
-      <td style="font-family:'DM Mono',monospace;font-weight:500">${r.index.toFixed(2)}×</td>
-      <td>${dots}</td>
-    </tr>`;
+      <td><span class="badge" style="background:${b.bg};color:${b.col};${sortKey==='benefit'?hl:''}">${r.benefit.toFixed(2)}</span></td>
+      <td><span class="badge" style="background:${f.bg};color:${f.col};${sortKey==='friction'?hl:''}">${r.friction.toFixed(2)}</span></td>
+      <td><span class="badge" style="background:${p.bg};color:${p.col};${sortKey==='priority'?hl:''}">${r.priority.toFixed(2)}</span></td>
+      <td><span class="badge" style="background:${ix.bg};color:${ix.col};${sortKey==='index'?hl:''}">${r.index.toFixed(2)}×</span></td>
+      <td>${dots}</td></tr>`;
   });
-  h += `</tbody></table></div>
-    <div class="legend-note">
-      <strong>Benefit score</strong> = weighted avg of Impact, Criticality, Value$ &nbsp;|&nbsp;
-      <strong>Friction score</strong> = weighted avg of Difficulty, Time, Risk, Dependencies &nbsp;|&nbsp;
-      <strong>Priority score</strong> = Benefit × (6 − Friction) &nbsp;|&nbsp;
-      <strong>Priority index</strong> = Benefit ÷ Friction &nbsp;|&nbsp;
-      Green dots = benefit criteria &nbsp;|&nbsp; Red dots = friction criteria
-    </div>`;
-
-  document.getElementById('res-area').innerHTML = h;
+  h+=`</tbody></table></div>
+  <div class="leg-note">
+    <strong>Benefit score</strong> = weighted avg of Impact, Criticality, Value$ &nbsp;|&nbsp;
+    <strong>Friction score</strong> = weighted avg of Difficulty, Time, Risk, Dependencies &nbsp;|&nbsp;
+    <strong>Priority score</strong> = Benefit × (6 − Friction) &nbsp;|&nbsp;
+    <strong>Priority index</strong> = Benefit ÷ Friction &nbsp;|&nbsp;
+    Active sort column is outlined &nbsp;|&nbsp;
+    Green dots = benefit &nbsp;|&nbsp; Red dots = friction
+  </div>`;
+  document.getElementById('res-area').innerHTML=h;
 }
 
-/* ── INIT ── */
 renderScoring();
 calc();
 </script>
